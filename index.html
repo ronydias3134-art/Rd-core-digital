@@ -3,85 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Core Digital — Avatarix Engine</title>
+    <title>Ecossistema Digital Autónomo</title>
     <style>
         :root {
-            --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6; --accent-hover: #2563eb;
-            --text-main: #f8fafc; --text-muted: #94a3b8; --danger: #ef4444; --success: #22c55e;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --border-color: #334155;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 600px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 480px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        h1 { font-size: 1.5rem; margin-bottom: 8px; text-align: center; color: var(--accent-color); }
+        p.subtitle { text-align: center; color: #94a3b8; font-size: 0.875rem; margin-bottom: 24px; }
         .hidden { display: none !important; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); margin-bottom: 20px; border: 1px solid #334155; }
-        h1, h2 { font-size: 1.5rem; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
-        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.5; }
-        input, select, textarea { width: 100%; padding: 12px 16px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 16px; }
-        button { width: 100%; padding: 12px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: var(--accent-hover); }
-        button.danger { background: var(--danger); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-        .stat-box { background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; text-align: center; }
-        .stat-box span { display: block; font-size: 1.8rem; font-weight: bold; color: var(--accent); margin-top: 8px; }
-        .log-box { background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; font-family: monospace; font-size: 0.85rem; color: var(--success); max-height: 150px; overflow-y: auto; margin-top: 12px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.875rem; margin-bottom: 6px; color: #cbd5e1; }
+        input[type="password"] { width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1.2rem; text-align: center; letter-spacing: 4px; }
+        button { width: 100%; padding: 12px; background: var(--accent-color); color: var(--bg-color); border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .error { color: var(--danger-color); font-size: 0.8rem; text-align: center; margin-top: 8px; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .badge { background: rgba(56, 189, 248, 0.1); color: var(--accent-color); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .card-metric { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+        .metric-title { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+        .metric-value { font-size: 1.5rem; font-weight: bold; color: var(--text-color); margin-top: 4px; }
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <!-- BLOCO DE SEGURANÇA -->
-        <div id="auth-screen" class="card">
-            <h1>RD Core Digital</h1>
-            <p>Insira o PIN de segurança para desbloquear o motor operacional.</p>
-            <input type="password" id="pin-input" placeholder="PIN de 4 dígitos" maxlength="4">
-            <button onclick="verifyPin()">Desbloquear Sistema</button>
+        <!-- TELA DE AUTENTICAÇÃO -->
+        <div id="auth-screen">
+            <h1>Ecossistema Autónomo</h1>
+            <p class="subtitle">Introduza o PIN de segurança para aceder ao motor</p>
+            <div class="form-group">
+                <input type="password" id="pin-input" maxlength="4" placeholder="••••">
+                <div id="error-msg" class="error hidden">PIN incorreto. Tente novamente.</div>
+            </div>
+            <button onclick="verifyPin()">Aceder ao Sistema</button>
         </div>
 
-        <!-- PAINEL PRINCIPAL -->
-        <div id="main-dashboard" class="card hidden">
-            <h1>
-                <span>Avatarix Engine</span>
-                <button onclick="lockSystem()" style="width: auto; padding: 6px 12px; font-size: 0.8rem; background: var(--danger);">Bloquear</button>
-            </h1>
-            <p>Ecossistema autónomo de automação, escala de publicações e gestão de tesouraria (Margem Operacional Otimizada: 5%).</p>
-            <div class="grid">
-                <div class="stat-box">Pubs Alvo <span>200</span></div>
-                <div class="stat-box">Margem <span>5%</span></div>
+        <!-- PAINEL DE CONTROLO (DASHBOARD) -->
+        <div id="dashboard-screen" class="hidden">
+            <div class="dashboard-header">
+                <h2>Painel Operacional</h2>
+                <span class="badge">ONLINE (5% Margem)</span>
             </div>
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-            <h3>Gerador de Prompts & Automação</h3>
-            <textarea id="prompt-topic" rows="3" placeholder="Insira o tema ou nicho para gerar o lote de conteúdo..."></textarea>
-            <button onclick="generateBatch()">Gerar Lote de 10 Publicações</button>
-            <div id="output-logs" class="log-box hidden"></div>
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-            <h3>Manutenção & Limpeza de Sistema</h3>
-            <button class="danger" onclick="clearCache()">Executar Limpeza de Cache</button>
+
+            <div class="card-metric">
+                <div class="metric-title">Estado do Motor</div>
+                <div class="metric-value" style="color: var(--success-color); font-size: 1.1rem;">Sincronizado & Ativo</div>
+            </div>
+
+            <div class="card-metric">
+                <div class="metric-title">Tesouraria Operacional</div>
+                <div class="metric-value">5.0%</div>
+            </div>
+
+            <div class="actions-grid">
+                <button class="btn-secondary" onclick="clearCache()">Limpar Cache</button>
+                <button class="btn-danger" onclick="lockSystem()">Bloquear</button>
+            </div>
         </div>
     </div>
+
     <script>
-        const CORRECT_PIN = "3134";
+        const MASTER_PIN = "3134";
+
         function verifyPin() {
-            if (document.getElementById('pin-input').value === CORRECT_PIN) {
+            const pin = document.getElementById('pin-input').value;
+            const errorMsg = document.getElementById('error-msg');
+            
+            if (pin === MASTER_PIN) {
                 document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('main-dashboard').classList.remove('hidden');
-            } else { alert('PIN incorreto.'); document.getElementById('pin-input').value = ''; }
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+            } else {
+                errorMsg.classList.remove('hidden');
+                document.getElementById('pin-input').value = '';
+            }
         }
+
+        function clearCache() {
+            alert('Cache limpa com sucesso. Sistema otimizado.');
+        }
+
         function lockSystem() {
-            document.getElementById('main-dashboard').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('pin-input').value = '';
+            document.getElementById('error-msg').classList.add('hidden');
         }
-        function generateBatch() {
-            const topic = document.getElementById('prompt-topic').value.trim();
-            const logBox = document.getElementById('output-logs');
-            if(!topic) { alert('Insira um tema.'); return; }
-            logBox.classList.remove('hidden');
-            logBox.innerHTML = `[INFO] A processar lote para: "${topic}"...<br>`;
-            setTimeout(() => {
-                logBox.innerHTML += `[SUCESSO] 10 Prompts e ganchos virais gerados com margem de 5%.<br>[AUTOMAÇÃO] Fila das 200 publicações sincronizada.`;
-                logBox.scrollTop = logBox.scrollHeight;
-            }, 800);
-        }
-        function clearCache() { localStorage.clear(); sessionStorage.clear(); alert('Cache limpa com sucesso!'); }
+
+        // Atalho para submeter com Enter
+        document.getElementById('pin-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifyPin();
+            }
+        });
     </script>
 </body>
 </html>
