@@ -1,110 +1,123 @@
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecossistema Digital Autónomo</title>
+    <title>RD Cor Digital — Ecossistema Autónomo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent-color: #38bdf8;
-            --border-color: #334155;
-            --success-color: #22c55e;
-            --danger-color: #ef4444;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 480px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        h1 { font-size: 1.5rem; margin-bottom: 8px; text-align: center; color: var(--accent-color); }
-        p.subtitle { text-align: center; color: #94a3b8; font-size: 0.875rem; margin-bottom: 24px; }
-        .hidden { display: none !important; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 0.875rem; margin-bottom: 6px; color: #cbd5e1; }
-        input[type="password"] { width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-color); font-size: 1.2rem; text-align: center; letter-spacing: 4px; }
-        button { width: 100%; padding: 12px; background: var(--accent-color); color: var(--bg-color); border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; }
-        button:hover { opacity: 0.9; }
-        .error { color: var(--danger-color); font-size: 0.8rem; text-align: center; margin-top: 8px; }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
-        .badge { background: rgba(56, 189, 248, 0.1); color: var(--accent-color); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        .card-metric { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-        .metric-title { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
-        .metric-value { font-size: 1.5rem; font-weight: bold; color: var(--text-color); margin-top: 4px; }
-        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="container">
-        <!-- TELA DE AUTENTICAÇÃO -->
-        <div id="auth-screen">
-            <h1>Ecossistema Autónomo</h1>
-            <p class="subtitle">Introduza o PIN de segurança para aceder ao motor</p>
-            <div class="form-group">
-                <input type="password" id="pin-input" maxlength="4" placeholder="••••">
-                <div id="error-msg" class="error hidden">PIN incorreto. Tente novamente.</div>
+    <!-- ECRÃ DE AUTENTICAÇÃO (PIN 3134) -->
+    <div id="auth-screen" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+        <div class="text-center mb-6">
+            <span class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-cyan-400 bg-cyan-950/60 rounded-full border border-cyan-800/50 uppercase">Ecossistema Autónomo</span>
+            <h1 class="text-2xl font-bold text-white tracking-tight">RD Cor Digital</h1>
+            <p class="text-sm text-slate-400 mt-1">Introduza o PIN de segurança para aceder ao motor</p>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <input type="password" id="pin-input" maxlength="4" placeholder="••••" class="w-full text-center text-2xl tracking-widest bg-slate-950 border border-slate-700 rounded-xl py-3 text-white focus:outline-none focus:border-cyan-500 transition-all">
             </div>
-            <button onclick="verifyPin()">Aceder ao Sistema</button>
+            <button onclick="verificarPin()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-xl transition-colors shadow-lg shadow-cyan-900/40">
+                Aceder ao Sistema
+            </button>
+            <p id="error-msg" class="text-xs text-red-400 text-center hidden">PIN incorreto. Tente novamente (3134).</p>
+        </div>
+    </div>
+
+    <!-- PAINEL OPERACIONAL AVANÇADO (HERANÇA AVATAR X) -->
+    <div id="dashboard-screen" class="w-full max-w-4xl hidden space-y-6">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl gap-4">
+            <div>
+                <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-800/50">ONLINE (5% Tesouraria)</span>
+                <h1 class="text-3xl font-bold text-white mt-2">RD Cor Digital</h1>
+                <p class="text-sm text-slate-400">Fundador: Ronilson Lopes Dias (Ronny) — Mindelo, Cabo Verde</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="limparCache()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium px-4 py-2 rounded-xl border border-slate-700 transition-colors">
+                    Limpar Cache
+                </button>
+                <button onclick="bloquearSistema()" class="bg-red-950/50 hover:bg-red-900/50 text-red-400 text-sm font-medium px-4 py-2 rounded-xl border border-red-800/50 transition-colors">
+                    Bloquear
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- ESTADO DO MOTOR -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-3">
+                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Estado do Motor</span>
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="text-xl font-semibold text-emerald-400">Sincronizado & Ativo</h2>
+                </div>
+                <p class="text-xs text-slate-400">Infraestrutura em nuvem otimizada na Vercel sem falhas de carregamento.</p>
+            </div>
+
+            <!-- TESOURARIA OPERACIONAL -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-3">
+                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tesouraria Operacional</span>
+                <div class="text-3xl font-bold text-white">5.0%</div>
+                <p class="text-xs text-slate-400">Margem operacional fixa aplicada autonomamente ao ecossistema.</p>
+            </div>
         </div>
 
-        <!-- PAINEL DE CONTROLO (DASHBOARD) -->
-        <div id="dashboard-screen" class="hidden">
-            <div class="dashboard-header">
-                <h2>Painel Operacional</h2>
-                <span class="badge">ONLINE (5% Margem)</span>
-            </div>
-
-            <div class="card-metric">
-                <div class="metric-title">Estado do Motor</div>
-                <div class="metric-value" style="color: var(--success-color); font-size: 1.1rem;">Sincronizado & Ativo</div>
-            </div>
-
-            <div class="card-metric">
-                <div class="metric-title">Tesouraria Operacional</div>
-                <div class="metric-value">5.0%</div>
-            </div>
-
-            <div class="actions-grid">
-                <button class="btn-secondary" onclick="clearCache()">Limpar Cache</button>
-                <button class="btn-danger" onclick="lockSystem()">Bloquear</button>
+        <!-- MÓDULOS INTEGRADOS DO ANTIGO AVATAR X -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-lg font-semibold text-white">Módulos Ativos do Ecossistema</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <div class="font-medium text-cyan-400">Segurança PIN</div>
+                    <div class="text-slate-400 text-xs mt-1">Autenticação restrita e validada (3134).</div>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <div class="font-medium text-cyan-400">Leitor Multimédia</div>
+                    <div class="text-slate-400 text-xs mt-1">Reprodução universal de ativos digitais.</div>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <div class="font-medium text-cyan-400">Gestão de Cache</div>
+                    <div class="text-slate-400 text-xs mt-1">Rotina automatizada de limpeza e velocidade.</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const MASTER_PIN = "3134";
+        const PIN_MESTRE = "3134";
 
-        function verifyPin() {
-            const pin = document.getElementById('pin-input').value;
+        function verificarPin() {
+            const input = document.getElementById('pin-input').value;
             const errorMsg = document.getElementById('error-msg');
             
-            if (pin === MASTER_PIN) {
+            if (input === PIN_MESTRE) {
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('dashboard-screen').classList.remove('hidden');
+                errorMsg.classList.add('hidden');
             } else {
                 errorMsg.classList.remove('hidden');
                 document.getElementById('pin-input').value = '';
             }
         }
 
-        function clearCache() {
-            alert('Cache limpa com sucesso. Sistema otimizado.');
-        }
-
-        function lockSystem() {
+        function bloquearSistema() {
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('pin-input').value = '';
-            document.getElementById('error-msg').classList.add('hidden');
         }
 
-        // Atalho para submeter com Enter
+        function limparCache() {
+            alert("Cache limpa com sucesso! O ecossistema RD Cor Digital foi otimizado.");
+        }
+
         document.getElementById('pin-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                verifyPin();
+                verificarPin();
             }
         });
     </script>
