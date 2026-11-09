@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RD Core Digital | Ecossistema Autónomo Nacional</title>
+    <style>
+        :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #38bdf8; --text-main: #f8fafc; --text-muted: #94a3b8; --success: #22c55e; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+        header { text-align: center; margin-bottom: 2rem; }
+        header h1 { font-size: 1.75rem; color: var(--accent); margin-bottom: 0.5rem; }
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+        .container { max-width: 600px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .card h2 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main); border-bottom: 1px solid #334155; padding-bottom: 8px; }
+        .btn { display: block; width: 100%; background-color: var(--accent); color: var(--bg-color); font-weight: bold; padding: 12px; border: none; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; font-size: 1rem; margin-top: 10px; }
+        .financial-box { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #090d16; padding: 12px; border-radius: 6px; }
+        .pin-section { margin-top: 15px; }
+        input[type="password"] { width: 100%; padding: 10px; background: #090d16; border: 1px solid #334155; border-radius: 6px; color: white; margin-top: 5px; font-size: 1rem; text-align: center; letter-spacing: 4px; }
+        footer { text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>RD Core Digital | Ecossistema Autónomo</h1>
+        <p>Infraestrutura Tecnológica Nacional — Gestão & Automação</p>
+    </header>
+    <div class="container">
+        <div class="card">
+            <h2>Estado da Infraestrutura</h2>
+            <p><strong>Nó Operacional:</strong> Ativo e Sincronizado</p>
+            <p><strong>Criador:</strong> Ronilson Dias (Ronny)</p>
+            <a href="https://ecossistema-autonomo.vercel.app" class="btn" target="_blank">Aceder ao Painel Global[span_0](start_span)[span_0](end_span)</a>
+        </div>
+        <div class="card">
+            <h2>Gestão de Tesouraria & Estratégia</h2>
+            <div class="financial-box">
+                <span>Margem Operacional Ativa:</span>
+                <strong style="color: var(--success);">Otimizada (Foco em Volume)</strong>
+            </div>
+            <div class="pin-section">
+                <label for="sec-pin">Insira o PIN de Segurança:</label>
+                <input type="password" id="sec-pin" maxlength="4" placeholder="••••">
+            </div>
+            <button class="btn" onclick="validarPin()">Desbloquear Painel</button>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2026 Ronilson Dias. RD Core Digital. Todos os direitos reservados.</p>
+    </footer>
+    <script>
+        function validarPin() {
+            const pin = document.getElementById('sec-pin').value;
+            if(pin.length === 4) { alert('PIN verificado com sucesso.'); } 
+            else { alert('Erro: Insira um PIN de 4 dígitos.'); }
+        }
+    </script>
+</body>
+</html>
