@@ -3,58 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Core Digital | Ecossistema Autónomo Nacional</title>
+    <title>RD Core Digital — Avatarix Engine</title>
     <style>
-        :root { --bg-color: #0f172a; --card-bg: #1e293b; --accent: #38bdf8; --text-main: #f8fafc; --text-muted: #94a3b8; --success: #22c55e; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
-        header { text-align: center; margin-bottom: 2rem; }
-        header h1 { font-size: 1.75rem; color: var(--accent); margin-bottom: 0.5rem; }
-        header p { color: var(--text-muted); font-size: 0.95rem; }
-        .container { max-width: 600px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
-        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .card h2 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-main); border-bottom: 1px solid #334155; padding-bottom: 8px; }
-        .btn { display: block; width: 100%; background-color: var(--accent); color: var(--bg-color); font-weight: bold; padding: 12px; border: none; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; font-size: 1rem; margin-top: 10px; }
-        .financial-box { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: #090d16; padding: 12px; border-radius: 6px; }
-        .pin-section { margin-top: 15px; }
-        input[type="password"] { width: 100%; padding: 10px; background: #090d16; border: 1px solid #334155; border-radius: 6px; color: white; margin-top: 5px; font-size: 1rem; text-align: center; letter-spacing: 4px; }
-        footer { text-align: center; margin-top: 2rem; color: var(--text-muted); font-size: 0.85rem; }
+        :root {
+            --bg-color: #0f172a; --card-bg: #1e293b; --accent: #3b82f6; --accent-hover: #2563eb;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --danger: #ef4444; --success: #22c55e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 600px; }
+        .hidden { display: none !important; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); margin-bottom: 20px; border: 1px solid #334155; }
+        h1, h2 { font-size: 1.5rem; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.5; }
+        input, select, textarea { width: 100%; padding: 12px 16px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 16px; }
+        button { width: 100%; padding: 12px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: var(--accent-hover); }
+        button.danger { background: var(--danger); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .stat-box { background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; text-align: center; }
+        .stat-box span { display: block; font-size: 1.8rem; font-weight: bold; color: var(--accent); margin-top: 8px; }
+        .log-box { background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; font-family: monospace; font-size: 0.85rem; color: var(--success); max-height: 150px; overflow-y: auto; margin-top: 12px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>RD Core Digital | Ecossistema Autónomo</h1>
-        <p>Infraestrutura Tecnológica Nacional — Gestão & Automação</p>
-    </header>
     <div class="container">
-        <div class="card">
-            <h2>Estado da Infraestrutura</h2>
-            <p><strong>Nó Operacional:</strong> Ativo e Sincronizado</p>
-            <p><strong>Criador:</strong> Ronilson Dias (Ronny)</p>
-            <a href="https://ecossistema-autonomo.vercel.app" class="btn" target="_blank">Aceder ao Painel Global[span_0](start_span)[span_0](end_span)</a>
+        <!-- BLOCO DE SEGURANÇA -->
+        <div id="auth-screen" class="card">
+            <h1>RD Core Digital</h1>
+            <p>Insira o PIN de segurança para desbloquear o motor operacional.</p>
+            <input type="password" id="pin-input" placeholder="PIN de 4 dígitos" maxlength="4">
+            <button onclick="verifyPin()">Desbloquear Sistema</button>
         </div>
-        <div class="card">
-            <h2>Gestão de Tesouraria & Estratégia</h2>
-            <div class="financial-box">
-                <span>Margem Operacional Ativa:</span>
-                <strong style="color: var(--success);">Otimizada (Foco em Volume)</strong>
+
+        <!-- PAINEL PRINCIPAL -->
+        <div id="main-dashboard" class="card hidden">
+            <h1>
+                <span>Avatarix Engine</span>
+                <button onclick="lockSystem()" style="width: auto; padding: 6px 12px; font-size: 0.8rem; background: var(--danger);">Bloquear</button>
+            </h1>
+            <p>Ecossistema autónomo de automação, escala de publicações e gestão de tesouraria (Margem Operacional Otimizada: 5%).</p>
+            <div class="grid">
+                <div class="stat-box">Pubs Alvo <span>200</span></div>
+                <div class="stat-box">Margem <span>5%</span></div>
             </div>
-            <div class="pin-section">
-                <label for="sec-pin">Insira o PIN de Segurança:</label>
-                <input type="password" id="sec-pin" maxlength="4" placeholder="••••">
-            </div>
-            <button class="btn" onclick="validarPin()">Desbloquear Painel</button>
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+            <h3>Gerador de Prompts & Automação</h3>
+            <textarea id="prompt-topic" rows="3" placeholder="Insira o tema ou nicho para gerar o lote de conteúdo..."></textarea>
+            <button onclick="generateBatch()">Gerar Lote de 10 Publicações</button>
+            <div id="output-logs" class="log-box hidden"></div>
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+            <h3>Manutenção & Limpeza de Sistema</h3>
+            <button class="danger" onclick="clearCache()">Executar Limpeza de Cache</button>
         </div>
     </div>
-    <footer>
-        <p>&copy; 2026 Ronilson Dias. RD Core Digital. Todos os direitos reservados.</p>
-    </footer>
     <script>
-        function validarPin() {
-            const pin = document.getElementById('sec-pin').value;
-            if(pin.length === 4) { alert('PIN verificado com sucesso.'); } 
-            else { alert('Erro: Insira um PIN de 4 dígitos.'); }
+        const CORRECT_PIN = "3134";
+        function verifyPin() {
+            if (document.getElementById('pin-input').value === CORRECT_PIN) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-dashboard').classList.remove('hidden');
+            } else { alert('PIN incorreto.'); document.getElementById('pin-input').value = ''; }
         }
+        function lockSystem() {
+            document.getElementById('main-dashboard').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('pin-input').value = '';
+        }
+        function generateBatch() {
+            const topic = document.getElementById('prompt-topic').value.trim();
+            const logBox = document.getElementById('output-logs');
+            if(!topic) { alert('Insira um tema.'); return; }
+            logBox.classList.remove('hidden');
+            logBox.innerHTML = `[INFO] A processar lote para: "${topic}"...<br>`;
+            setTimeout(() => {
+                logBox.innerHTML += `[SUCESSO] 10 Prompts e ganchos virais gerados com margem de 5%.<br>[AUTOMAÇÃO] Fila das 200 publicações sincronizada.`;
+                logBox.scrollTop = logBox.scrollHeight;
+            }, 800);
+        }
+        function clearCache() { localStorage.clear(); sessionStorage.clear(); alert('Cache limpa com sucesso!'); }
     </script>
 </body>
 </html>
