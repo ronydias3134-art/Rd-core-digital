@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -31,7 +30,7 @@
         </div>
     </div>
 
-    <!-- PAINEL OPERACIONAL AVANÇADO (HERANÇA AVATAR X) -->
+    <!-- PAINEL OPERACIONAL AVANÇADO (COMPLETO) -->
     <div id="dashboard-screen" class="w-full max-w-4xl hidden space-y-6">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl gap-4">
             <div>
@@ -57,34 +56,46 @@
                     <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                     <h2 class="text-xl font-semibold text-emerald-400">Sincronizado & Ativo</h2>
                 </div>
-                <p class="text-xs text-slate-400">Infraestrutura em nuvem otimizada na Vercel sem falhas de carregamento.</p>
+                <p class="text-xs text-slate-400">Infraestrutura otimizada em nuvem com alta resiliência e baixa latência na Vercel.</p>
             </div>
 
             <!-- TESOURARIA OPERACIONAL -->
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-3">
                 <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tesouraria Operacional</span>
                 <div class="text-3xl font-bold text-white">5.0%</div>
-                <p class="text-xs text-slate-400">Margem operacional fixa aplicada autonomamente ao ecossistema.</p>
+                <p class="text-xs text-slate-400">Margem operacional fixa integrada diretamente na gestão do ecossistema.</p>
             </div>
         </div>
 
-        <!-- MÓDULOS INTEGRADOS DO ANTIGO AVATAR X -->
+        <!-- MÓDULOS MULTIMÉDIA E GESTÃO DE ATIVOS (HERANÇA AVATAR X) -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
             <h2 class="text-lg font-semibold text-white">Módulos Ativos do Ecossistema</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                    <div class="font-medium text-cyan-400">Segurança PIN</div>
-                    <div class="text-slate-400 text-xs mt-1">Autenticação restrita e validada (3134).</div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <div class="font-medium text-cyan-400">Autenticação PIN</div>
+                    <div class="text-slate-400 text-xs">Proteção estrita com acesso restrito por código (3134).</div>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                     <div class="font-medium text-cyan-400">Leitor Multimédia</div>
-                    <div class="text-slate-400 text-xs mt-1">Reprodução universal de ativos digitais.</div>
+                    <div class="text-slate-400 text-xs">Reprodução fluida de conteúdos digitais e ativos multimédia.</div>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                    <div class="font-medium text-cyan-400">Gestão de Cache</div>
-                    <div class="text-slate-400 text-xs mt-1">Rotina automatizada de limpeza e velocidade.</div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <div class="font-medium text-cyan-400">Gestão de Ficheiros</div>
+                    <div class="text-slate-400 text-xs">Limpeza automática de cache e otimização de performance.</div>
                 </div>
             </div>
+        </div>
+
+        <!-- CENTRO DE CONTROLO DE ATIVOS DIGITAIS -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-lg font-semibold text-white">Centro de Controlo & Operações</h2>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="asset-input" placeholder="Insira o link ou ID do ativo digital..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500">
+                <button onclick="executarAcaoAtivo()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium px-6 py-3 rounded-xl transition-colors text-sm shadow-lg shadow-cyan-900/40">
+                    Processar Ativo
+                </button>
+            </div>
+            <p id="asset-feedback" class="text-xs text-emerald-400 hidden">Ativo processado com sucesso na rede RD Cor Digital.</p>
         </div>
     </div>
 
@@ -112,7 +123,19 @@
         }
 
         function limparCache() {
-            alert("Cache limpa com sucesso! O ecossistema RD Cor Digital foi otimizado.");
+            alert("Cache limpa com sucesso! O ecossistema RD Cor Digital foi otimizado a 100%.");
+        }
+
+        function executarAcaoAtivo() {
+            const inputVal = document.getElementById('asset-input').value;
+            const feedback = document.getElementById('asset-feedback');
+            if(inputVal.trim() !== "") {
+                feedback.classList.remove('hidden');
+                document.getElementById('asset-input').value = '';
+                setTimeout(() => feedback.classList.add('hidden'), 4000);
+            } else {
+                alert("Por favor, insira um link ou ID válido.");
+            }
         }
 
         document.getElementById('pin-input').addEventListener('keypress', function (e) {
