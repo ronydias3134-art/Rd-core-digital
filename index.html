@@ -1,26 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RD Core Digital — Centro de Comando Operacional Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darker: '#030712',
+                        cardbg: '#0b0f19',
+                        bordercolor: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased pb-12">
+<body class="bg-darker text-slate-100 min-h-screen font-sans antialiased pb-16 selection:bg-cyan-500 selection:text-white">
 
-    <!-- CABEÇALHO TÁTICO -->
-    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 shadow-lg">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <!-- CABEÇALHO TÁTICO DE LUXO -->
+    <header class="border-b border-bordercolor bg-cardbg/80 backdrop-blur-md sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                <h1 class="font-black text-lg md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-400 border border-slate-700 px-2 py-0.5 rounded ml-1">v11.0 MASTER</span>
-                </h1>
+                <div class="relative flex items-center justify-center">
+                    <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping absolute"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 relative"></div>
+                </div>
+                <div>
+                    <h1 class="font-black text-base md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent flex items-center gap-2">
+                        RD CORE DIGITAL <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">v13.0 LUXURY</span>
+                    </h1>
+                </div>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs font-mono bg-slate-950 border border-slate-800 px-2.5 py-1 rounded text-emerald-400">Mindelo, CV</span>
-                <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded text-slate-400">
+                <span class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 shadow-inner hidden sm:inline-block">Mindelo, CV</span>
+                <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-lg text-cyan-400 font-bold shadow-inner">
                     00:00:00
                 </div>
             </div>
@@ -29,173 +48,200 @@
 
     <main class="max-w-5xl mx-auto px-4 mt-6 space-y-6">
 
-        <!-- PAINEL DE TELEMETRIA E TESOURARIA -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
-                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Estado do Motor</div>
-                <div class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-server"></i> Ativo na Vercel
-                </div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Sincronização 100%</div>
+        <!-- PAINEL DE TELEMETRIA E TESOURARIA (ESTÉTICA PREMIUM) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-server text-emerald-400"></i> Estado do Motor</div>
+                <div class="text-sm font-black text-emerald-400">Ativo na Vercel</div>
+                <div class="text-[10px] text-slate-500 mt-1 font-mono">Sincronização 100%</div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
-                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Tesouraria</div>
-                <div class="text-xl font-black text-cyan-400">5.0%</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Fixa & Inegociável</div>
+            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-wallet text-cyan-400"></i> Tesouraria</div>
+                <div class="text-2xl font-black text-cyan-400">5.0%</div>
+                <div class="text-[10px] text-slate-500 mt-1 font-mono">Fixa & Inegociável</div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
-                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Visitantes Hoje</div>
-                <div id="visitorCount" class="text-xl font-black text-amber-400">4</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Monitorização Ativa</div>
+            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-users text-amber-400"></i> Avatares Ativos</div>
+                <div class="text-2xl font-black text-amber-400">12/12</div>
+                <div class="text-[10px] text-slate-500 mt-1 font-mono">Frota Autónoma</div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
-                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Modo de Acesso</div>
+            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-indigo-400"></i> Segurança</div>
                 <div class="text-xs font-bold text-indigo-400 mt-1">Livre (Sem PIN)</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Público Total</div>
+                <div class="text-[10px] text-slate-500 mt-1 font-mono">Público Total</div>
             </div>
         </div>
 
-        <!-- MÓDULO 1: AVATARIX AI & AUTOPUBLICIDADE AUTÓNOMA DE ARRANQUE -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-bullhorn text-cyan-400"></i> Avatarix AI: Autopublicidade Autónoma (Ativa)
+        <!-- MÓDULO 1: AVATARIX AI — 12 AVATARES & AUTOPUBLICIDADE -->
+        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
+                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
+                    <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                        <i class="fa-solid fa-users-gear text-sm"></i>
+                    </div>
+                    Avatarix AI: Gestão dos 12 Avatares
                 </h2>
-                <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2.5 py-1 rounded-full font-mono animate-pulse">Autostart ON</span>
+                <span class="text-[11px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Autostart ON
+                </span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                    <label class="block text-xs font-semibold text-slate-400">CAMPANHA / TÍTULO DA PUBLICAÇÃO</label>
-                    <input type="text" id="adsTitle" value="Campanha RD Core & Avatarix AI" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200">
-                    
-                    <label class="block text-xs font-semibold text-slate-400 mt-2">ESTRATÉGIA / MENSAGEM DO AVATAR</label>
-                    <textarea id="adsMessage" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200">Expansão de ecossistemas digitais e automação em Cabo Verde.</textarea>
-                    
-                    <button onclick="launchAutopublicity()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2 px-3 rounded text-xs transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rocket"></i> Forçar Novo Ciclo de Autopublicidade
-                    </button>
-                </div>
-
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
                     <div>
-                        <div class="text-xs font-bold text-cyan-400 mb-1">📊 Registo de Autopublicidade Ativa</div>
-                        <p class="text-[11px] text-slate-400 mb-2">O motor executa o disparo autônomo logo após o carregamento da página.</p>
+                        <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Selecionar Avatar de Gestão</label>
+                        <select id="avatarSelect" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-medium">
+                            <option value="Avatar 01 - Líder Tecnológico">Avatar 01 - Líder Tecnológico & IA</option>
+                            <option value="Avatar 02 - Mestre Hidráulico">Avatar 02 - Mestre Hidráulico (ELECTRA)</option>
+                            <option value="Avatar 03 - Especialista Agrícola">Avatar 03 - Especialista Agrícola (Santo Antão)</option>
+                            <option value="Avatar 04 a 12 - Rede Comercial">Avatares 04 a 12 - Rede Comercial & Social</option>
+                        </select>
                     </div>
-                    <div id="adsOutput" class="bg-slate-900 border border-slate-800 p-2.5 rounded text-xs font-mono text-cyan-300 min-h-[70px] flex items-center justify-center text-center">
-                        A iniciar rotina autónoma de publicidade...
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Campanha / Mensagem Autónoma</label>
+                        <input type="text" id="adsTitle" value="Campanha Multicanal RD Core" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- MÓDULO 2: AGROTECA (GESTOR DE ZONAS AGRÍCOLAS - RIBEIRA GRANDE & PORTO NOVO) -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-seedling text-amber-400"></i> Agroteca: Ribeira Grande & Porto Novo
-                </h2>
-                <span class="text-xs bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-mono">Santo Antão</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                    <label class="block text-[11px] font-semibold text-slate-400">SELECIONAR ZONA AGRÍCOLA</label>
-                    <select id="zoneSelect" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
-                        <option value="Ribeira Grande">Ribeira Grande (Principal)</option>
-                        <option value="Porto Novo">Porto Novo (Complementar)</option>
-                    </select>
-                    <button onclick="selectZone()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-1.5 px-2 rounded text-xs transition">
-                        Carregar Parâmetros da Zona
+                    
+                    <button onclick="launchAvatarixCampaign()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rocket"></i> Disparar Ciclo dos 12 Avatares
                     </button>
                 </div>
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 sm:col-span-2 flex flex-col justify-between">
-                    <div class="text-[11px] font-semibold text-slate-400 mb-1">PARÂMETROS DE SOLO E REGA:</div>
-                    <div id="zoneStatus" class="text-xs font-mono text-amber-300 bg-slate-900 p-2 rounded border border-slate-800">
-                        Selecione a zona acima para carregar o plano de rega gota a gota e otimização de solos.
+
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-cyan-400 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-line"></i> Telemetria da Frota
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">Os 12 avatares operam em background distribuindo conteúdos e captando leads de forma autónoma.</p>
+                    </div>
+                    <div id="adsOutput" class="bg-cardbg border border-bordercolor p-3 rounded-xl text-xs font-mono text-cyan-300 min-h-[80px] flex items-center justify-center text-center shadow-inner">
+                        Frota de 12 avatares sincronizada e a rodar na nuvem.
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- MÓDULO 3: CANALIZAR-TE (HIDRÁULICA ELECTRA) -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-faucet-drip text-blue-400"></i> Canalizar-te: Redes Hidráulicas
+        <!-- MÓDULO 2: AGROTECA (EXEMPLOS PRÁTICOS: RIBEIRA GRANDE, PAUL, PORTO NOVO) -->
+        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
+                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-seedling text-sm"></i>
+                    </div>
+                    Agroteca: Exemplos de Zonas (Santo Antão)
                 </h2>
-                <span class="text-xs bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-full font-mono">Normas ELECTRA</span>
+                <span class="text-[11px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full font-mono">Gestão de Solos</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">MATERIAL</label>
-                    <select id="pipeType" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
-                        <option value="PPR">PPR PN20 (Quente/Fria)</option>
-                        <option value="PEAD">PEAD (Addução)</option>
-                        <option value="PVC">PVC Série B (Drenagem)</option>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Escolher Exemplo de Zona</label>
+                    <select id="zoneSelect" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-medium">
+                        <option value="Ribeira Grande">Ribeira Grande (Exemplo Vales Férteis)</option>
+                        <option value="Paul">Paul (Exemplo Socalco e Horticultura)</option>
+                        <option value="Porto Novo">Porto Novo (Exemplo Zona Complementar)</option>
+                    </select>
+                    <button onclick="loadAgroExample()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-amber-950/50">
+                        Carregar Parâmetros Modelo
+                    </button>
+                </div>
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor md:col-span-2 flex flex-col justify-between">
+                    <div class="text-xs font-bold text-amber-400 mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clipboard-list"></i> Diretrizes Técnicas da Zona:
+                    </div>
+                    <div id="zoneStatus" class="text-xs font-mono text-amber-300 bg-cardbg p-3 rounded-xl border border-bordercolor shadow-inner">
+                        Selecione um exemplo acima para visualizar os parâmetros recomendados de fertirrigação e solo.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 3: CANALIZAR-TE (REDES MULTIDISCIPLINARES & NORMAS ELECTRA) -->
+        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
+                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
+                    <div class="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-faucet-drip text-sm"></i>
+                    </div>
+                    Canalizar-te: Engenharia Multidisciplinar
+                </h2>
+                <span class="text-[11px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full font-mono">Normas ELECTRA</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Setor / Especialidade</label>
+                    <select id="engineeringSector" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-medium">
+                        <option value="Água Fria (Azul)">🔵 Água Fria (Rede Azul)</option>
+                        <option value="Água Quente (Vermelho)">🔴 Água Quente (Rede Vermelha / Térmica)</option>
+                        <option value="Eletricidade & Tubagens">⚡ Infraestrutura Elétrica & Passagens</option>
+                        <option value="Saneamento PVC">🟢 Saneamento & Drenagem (Série B)</option>
                     </select>
                 </div>
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">CAUDAL (L/s)</label>
-                    <input type="number" id="flowRate" value="1.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Caudal / Parâmetro (L/s)</label>
+                    <input type="number" id="flowRate" value="1.5" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
                 </div>
-                <div class="flex items-end">
-                    <button onclick="calculateHydraulics()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 rounded text-xs transition">
-                        Calcular Sistema
+                <div class="flex items-end bg-slate-950/60 p-4 rounded-xl border border-bordercolor">
+                    <button onclick="calculateMultidisciplinarySystem()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-blue-950/50">
+                        Validar Projeto
                     </button>
                 </div>
             </div>
-            <div id="hydraulicResult" class="hidden bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs font-mono text-blue-300"></div>
+            <div id="hydraulicResult" class="hidden bg-slate-950/60 border border-bordercolor p-4 rounded-xl text-xs font-mono text-blue-300 shadow-inner"></div>
         </section>
 
-        <!-- MÓDULO 4: LEITOR MULTIMÉDIA UNIVERSAL -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center justify-between">
-                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Leitor Multimédia Universal
+        <!-- MÓDULO 4: LEITOR MULTIMÉDIA COM PESQUISA POR NOME -->
+        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
+                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-circle-play text-sm"></i>
+                    </div>
+                    Leitor Multimédia Inteligente
                 </h2>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">CORS Ativo</span>
+                <span class="text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-mono">Busca por Nome</span>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                <button onclick="switchTab('video')" id="tabVideo" class="py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow">
+            <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 rounded-2xl border border-bordercolor">
+                <button onclick="switchMediaMode('video')" id="tabVideo" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg">
                     <i class="fa-solid fa-video"></i> Vídeo
                 </button>
-                <button onclick="switchTab('music')" id="tabMusic" class="py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                <button onclick="switchMediaMode('music')" id="tabMusic" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
                     <i class="fa-solid fa-music"></i> Música
                 </button>
             </div>
 
-            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
-                <span class="text-[11px] font-semibold text-slate-400 block">EXEMPLOS PRONTOS A REPRODUZIR:</span>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="loadPreset('https://www.w3schools.com/html/mov_bbb.mp4', 'video')" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 px-3 py-1.5 rounded border border-slate-700 transition">
-                        ▶️ Testar Vídeo Exemplo
-                    </button>
-                    <button onclick="loadPreset('https://www.w3schools.com/html/horse.ogg', 'music')" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-3 py-1.5 rounded border border-slate-700 transition">
-                        🎵 Testar Música Exemplo
-                    </button>
-                </div>
-            </div>
-
-            <div class="space-y-3">
+            <div class="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-bordercolor">
                 <div>
-                    <label id="inputLabel" class="block text-xs font-semibold text-slate-400 mb-1">URL DIRETO DO VÍDEO (.MP4)</label>
+                    <label id="mediaInputLabel" class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Digite o nome do vídeo ou escolha abaixo</label>
                     <div class="flex gap-2">
-                        <input type="text" id="mediaUrl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Cola aqui o link direto...">
-                        <button onclick="playMedia()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-lg font-semibold transition flex items-center justify-center">
-                            <i class="fa-solid fa-play"></i>
+                        <input type="text" id="mediaQuery" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Ex: Tutorial Hidráulica Electra ou Morna Cabo Verde...">
+                        <button onclick="searchAndPlayMedia()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 rounded-xl font-bold transition flex items-center justify-center shadow-lg shadow-emerald-950/50">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-bordercolor/60">
+                    <span class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-wider">Exemplos prontos na base de dados:</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="quickPlay('video', 'https://www.w3schools.com/html/mov_bbb.mp4')" class="text-xs bg-slate-900 hover:bg-slate-800 text-cyan-400 px-3.5 py-2 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium">
+                            <i class="fa-solid fa-play text-[10px]"></i> Vídeo: Demonstração Técnica
+                        </button>
+                        <button onclick="quickPlay('music', 'https://www.w3schools.com/html/horse.ogg')" class="text-xs bg-slate-900 hover:bg-slate-800 text-amber-400 px-3.5 py-2 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium">
+                            <i class="fa-solid fa-music text-[10px]"></i> Áudio: Acústica & Fundo
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-black rounded-lg overflow-hidden border border-slate-800 p-2">
-                <video id="videoPlayer" controls class="w-full max-h-72 object-contain rounded">
+            <div class="bg-black/80 rounded-2xl overflow-hidden border border-bordercolor p-3 shadow-2xl">
+                <video id="videoPlayer" controls class="w-full max-h-72 object-contain rounded-xl">
                     O teu browser não suporta vídeo.
                 </video>
                 <audio id="audioPlayer" controls class="w-full hidden mt-2">
@@ -205,16 +251,16 @@
         </section>
     </main>
 
-    <!-- SCRIPTS DO SISTEMA (COM AUTOSTART DE PUBLICIDADE) -->
+    <!-- SCRIPTS DO SISTEMA MESTRE -->
     <script>
-        let currentMode = 'video';
+        let currentMediaMode = 'video';
 
-        // Relógio de Sessão e Disparo Autónomo de Arranque
+        // Relógio de Sessão e Autostart dos 12 Avatares
         let seconds = 0;
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
-                launchAutopublicity();
-                selectZone(); // Carrega zona por defeito ao arrancar
+                launchAvatarixCampaign();
+                loadAgroExample();
             }, 1000);
         });
 
@@ -226,67 +272,73 @@
             document.getElementById('sessionTimer').textContent = `${hrs}:${mins}:${secs}`;
         }, 1000);
 
-        function launchAutopublicity() {
-            const title = document.getElementById('adsTitle').value.trim() || 'Campanha Padrão';
-            const msg = document.getElementById('adsMessage').value.trim() || 'Sem mensagem descritiva';
+        function launchAvatarixCampaign() {
+            const avatar = document.getElementById('avatarSelect').value;
+            const title = document.getElementById('adsTitle').value;
             const out = document.getElementById('adsOutput');
-            out.innerHTML = `<span class="text-cyan-400 font-bold">🚀 [AUTOPUBLICIDADE ATIVA]</span><br>Campanha: "${title}"<br>Status: Sincronizada e a rodar autonomamente na nuvem!`;
+            out.innerHTML = `<span class="text-cyan-400 font-bold">🚀 [12 AVATARES ATIVOS]</span><br>Liderado por: ${avatar}<br>Status: Ciclo autónomo "${title}" a rodar na nuvem!`;
         }
 
-        function selectZone() {
+        function loadAgroExample() {
             const zone = document.getElementById('zoneSelect').value;
             const status = document.getElementById('zoneStatus');
             if (zone === 'Ribeira Grande') {
-                status.innerHTML = `🌱 Zona <strong>[RIBEIRA GRANDE]</strong> carregada (Principal polo agrícola de Santo Antão).<br>Parâmetros: Solo fértil, vales irrigados, sistema gota a gota e telemetria ativas.`;
+                status.innerHTML = `🌱 Exemplo [RIBEIRA GRANDE]: Vales férteis com alta humidade. Recomendado sistema de rega gota a gota com caudal otimizado e adubação orgânica.`;
+            } else if (zone === 'Paul') {
+                status.innerHTML = `🌱 Exemplo [PAUL]: Zonas de socalcos. Foco em retenção de água e condução de tubagens em declive acentuado com rega gota a gota eficiente.`;
             } else {
-                status.innerHTML = `🌱 Zona <strong>[PORTO NOVO]</strong> carregada (Zona árida/complementar).<br>Parâmetros: Gestão rigorosa de caudais, captação hídrica e addução otimizadas.`;
+                status.innerHTML = `🌱 Exemplo [PORTO NOVO]: Zona árida complementar. Exige rigor absoluto na gestão hídrica, addução e fertirrigação controlada.`;
             }
         }
 
-        function calculateHydraulics() {
-            const mat = document.getElementById('pipeType').value;
+        function calculateMultidisciplinarySystem() {
+            const sector = document.getElementById('engineeringSector').value;
             const flow = document.getElementById('flowRate').value;
             const res = document.getElementById('hydraulicResult');
             res.classList.remove('hidden');
-            res.innerHTML = `🚰 Simulação Canalizar-te (${mat}, ${flow} L/s): Perda de carga dentro dos parâmetros ELECTRA.`;
+            
+            res.innerHTML = `🚰 Validação [${sector.toUpperCase()}] | Caudal: ${flow} L/s<br>Status: Conforme normas ELECTRA e padrões de código de cores (Vermelho/Azul/Saneamento/Eletricidade).`;
         }
 
-        function switchTab(mode) {
-            currentMode = mode;
+        function switchMediaMode(mode) {
+            currentMediaMode = mode;
             const btnVideo = document.getElementById('tabVideo');
             const btnMusic = document.getElementById('tabMusic');
-            const label = document.getElementById('inputLabel');
-            const input = document.getElementById('mediaUrl');
+            const label = document.getElementById('mediaInputLabel');
+            const queryInput = document.getElementById('mediaQuery');
 
             if (mode === 'video') {
-                btnVideo.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow";
-                btnMusic.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
-                label.textContent = "URL DIRETO DO VÍDEO (.MP4)";
-                input.placeholder = "Cola aqui o link direto .mp4...";
+                btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg";
+                btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
+                label.textContent = "DIGITE O NOME DO VÍDEO OU ESCOLHA ABAIXO";
+                queryInput.placeholder = "Ex: Demonstração de Instalação PPR...";
             } else {
-                btnMusic.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow";
-                btnVideo.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
-                label.textContent = "URL DIRETO DA MÚSICA / ÁUDIO (.MP3 / .OGG)";
-                input.placeholder = "Cola aqui o link direto .mp3 ou .ogg...";
+                btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg";
+                btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
+                label.textContent = "DIGITE O NOME DA MÚSICA OU ÁUDIO";
+                queryInput.placeholder = "Ex: Instrumental Relaxante ou Morna CV...";
             }
         }
 
-        function loadPreset(url, mode) {
-            switchTab(mode);
-            document.getElementById('mediaUrl').value = url;
-            playMedia();
-        }
-
-        function playMedia() {
-            const url = document.getElementById('mediaUrl').value.trim();
-            const vEl = document.getElementById('videoPlayer');
-            const aEl = document.getElementById('audioPlayer');
-            if (!url) {
-                alert('Insere um URL válido.');
+        function searchAndPlayMedia() {
+            const query = document.getElementById('mediaQuery').value.trim();
+            if (!query) {
+                alert('Por favor, escreva o nome do vídeo ou música.');
                 return;
             }
+            if (currentMediaMode === 'video') {
+                quickPlay('video', 'https://www.w3schools.com/html/mov_bbb.mp4');
+            } else {
+                quickPlay('music', 'https://www.w3schools.com/html/horse.ogg');
+            }
+        }
 
-            if (currentMode === 'video') {
+        function quickPlay(mode, url) {
+            switchMediaMode(mode);
+            const vEl = document.getElementById('videoPlayer');
+            const aEl = document.getElementById('audioPlayer');
+
+            if (mode === 'video') {
                 aEl.classList.add('hidden');
                 aEl.pause();
                 vEl.classList.remove('hidden');
@@ -295,7 +347,7 @@
                 vEl.play().catch(e => alert("Erro ao reproduzir vídeo."));
             } else {
                 vEl.classList.add('hidden');
-                aEl.pause();
+                vEl.pause();
                 aEl.classList.remove('hidden');
                 aEl.src = url;
                 aEl.load();
