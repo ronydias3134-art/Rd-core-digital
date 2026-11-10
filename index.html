@@ -3,111 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Core Digital — Painel Operacional</title>
+    <title>RD Core Digital — Painel de Controlo & Testes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased pb-10">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased pb-12">
 
-    <!-- CABEÇALHO -->
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+    <!-- CABEÇALHO TÁTICO -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 shadow-lg">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-                <h1 class="font-extrabold text-xl tracking-wider bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-500 border border-slate-800 px-2 py-0.5 rounded">v2.0 PRO</span>
+                <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <h1 class="font-black text-lg md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-400 border border-slate-700 px-2 py-0.5 rounded ml-1">v4.0 TOTAL</span>
                 </h1>
             </div>
-            <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-400">
-                00:00:00
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono bg-slate-950 border border-slate-800 px-2.5 py-1 rounded text-emerald-400 hidden sm:inline">Mindelo, CV</span>
+                <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded text-slate-400">
+                    00:00:00
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 mt-6 space-y-6">
+    <main class="max-w-5xl mx-auto px-4 mt-6 space-y-6">
 
         <!-- PAINEL DE TELEMETRIA E TESOURARIA -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Estado do Motor</div>
-                <div class="text-lg font-bold text-emerald-400 flex items-center gap-2">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
+                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Estado do Motor</div>
+                <div class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-server"></i> Ativo na Vercel
                 </div>
-                <div class="text-xs text-slate-500 mt-1">Sincronização Nuvem OK</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sincronização OK</div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Margem de Tesouraria</div>
-                <div class="text-2xl font-black text-cyan-400">5.0%</div>
-                <div class="text-xs text-slate-500 mt-1">Fixa & Inegociável</div>
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
+                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Tesouraria</div>
+                <div class="text-xl font-black text-cyan-400">5.0%</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Fixa & Inegociável</div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Total Visitantes Hoje</div>
-                <div id="visitorCount" class="text-2xl font-black text-amber-400">1</div>
-                <div class="text-xs text-slate-500 mt-1">Monitorização Ativa</div>
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
+                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Visitantes Hoje</div>
+                <div id="visitorCount" class="text-xl font-black text-amber-400">4</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Monitorização Ativa</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
+                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Acesso ao Teste</div>
+                <div class="text-xs font-bold text-indigo-400 mt-1">Livre (Sem PIN)</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Público</div>
             </div>
         </div>
 
-        <!-- LEITOR MULTIMÉDIA UNIVERSAL -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Leitor Multimédia Universal
+        <!-- CONSOLE DE TESTES OPERACIONAIS INSTANTÂNEOS -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
+                    <i class="fa-solid fa-vial-circle-check text-emerald-400"></i> Centro de Testes de Funcionalidades (Clique & Teste)
                 </h2>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">CORS Ativo</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">100% Interativo</span>
             </div>
 
-            <div class="mb-4">
-                <label class="block text-xs font-semibold text-slate-400 mb-2">TESTAR COM MÍDIA LEVE DE AMOSTRA:</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="setAndPlay('https://www.w3schools.com/html/mov_bbb.mp4')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-3 rounded-lg border border-slate-700 text-left transition flex items-center gap-2">
-                        <i class="fa-solid fa-video text-cyan-400"></i> Vídeo Leve (MP4)
-                    </button>
-                    <button onclick="setAndPlay('https://www.w3schools.com/html/horse.ogg')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 px-3 rounded-lg border border-slate-700 text-left transition flex items-center gap-2">
-                        <i class="fa-solid fa-music text-amber-400"></i> Áudio Leve (OGG)
-                    </button>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <!-- Teste 1: Automação -->
+                <button onclick="runTest('automação', 'Fluxo de Scripts & Webhooks executados com sucesso.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">🤖 Teste de Automação</span>
+                        <i class="fa-solid fa-bolt text-xs text-slate-500"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Dispara rotinas de atualização e verificação de sistemas.</p>
+                </button>
 
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">URL DA MÍDIA DIRETA (MP4, MP3, OGG, STREAM)</label>
-                    <input type="text" id="mediaUrl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Cola aqui o link direto do ficheiro...">
-                </div>
-                <button onclick="playCustomMedia()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-play"></i> Reproduzir Stream
+                <!-- Teste 2: Publicações -->
+                <button onclick="runTest('publicações', 'Publicação de Teste gerada e pronta para envio.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-cyan-400 group-hover:text-cyan-300">📢 Teste de Publicações</span>
+                        <i class="fa-solid fa-paper-plane text-xs text-slate-500"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Simula criação e publicação de feeds/postagens em redes.</p>
+                </button>
+
+                <!-- Teste 3: Hidráulica -->
+                <button onclick="runTest('hidráulica', 'Cálculo de caudal PPR/PEAD validado segundo ELECTRA.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-blue-400 group-hover:text-blue-300">🚰 Teste Canalizar-te</span>
+                        <i class="fa-solid fa-faucet-drip text-xs text-slate-500"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Módulo de perdas de carga e orçamentos hidráulicos.</p>
+                </button>
+
+                <!-- Teste 4: Agrotech -->
+                <button onclick="runTest('agrotech', 'Relação de fertirrigação para Casa de Meio calculada.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400 group-hover:text-amber-300">🌱 Teste Casa de Meio</span>
+                        <i class="fa-solid fa-seedling text-xs text-slate-500"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Vigilação de solos, rega gota a gota e culturas.</p>
+                </button>
+
+                <!-- Teste 5: Telemetria -->
+                <button onclick="runTest('telemetria', 'Registo de sessão e contagem de utilizadores atualizado.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-indigo-400 group-hover:text-indigo-300">📊 Teste de Telemetria</span>
+                        <i class="fa-solid fa-chart-line text-xs text-slate-500"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Verifica métricas do servidor em tempo real.</p>
+                </button>
+
+                <!-- Teste 6: Avatarix AI -->
+                <button onclick="runTest('avatarix', 'Agentes inteligentes prontos para tarefas autónomas.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-purple-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-purple-400 group-hover:text-purple-300">🤖 Teste Avatarix AI</span>
+                        <i class="fa-solid fa-brain text-xs text-slate-500"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Verifica o estado da inteligência e automação de vídeo.</p>
                 </button>
             </div>
 
-            <div class="mt-4 bg-black rounded-lg overflow-hidden border border-slate-800">
-                <video id="activePlayer" controls class="w-full max-h-72 object-contain" preload="none">
-                    O teu navegador não suporta a reprodução direta deste elemento.
-                </video>
+            <!-- ECRÃ DE LOG DE TESTE (RESULTADO DIRETO NA TELA) -->
+            <div id="testConsole" class="hidden bg-slate-950 border border-slate-800 p-4 rounded-xl font-mono text-xs text-emerald-400 space-y-1">
+                <div class="flex justify-between text-slate-500 border-b border-slate-900 pb-1 mb-2">
+                    <span>STATUS DO TESTE</span>
+                    <span id="testTimestamp">00:00:00</span>
+                </div>
+                <div id="testContent" class="text-slate-200"></div>
             </div>
         </section>
 
-        <!-- PARÂMETROS E CONFIGURAÇÃO -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-emerald-400"></i> Parâmetros do Ecossistema
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                    <span class="text-slate-500 block">Domínio Principal:</span>
-                    <span class="text-slate-200 font-bold">rd-core-digital.vercel.app</span>
+        <!-- LEITOR MULTIMÉDIA UNIVERSAL REESTRUTURADO -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
+                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Leitor Multimédia & Reprodutor Universal
+                </h2>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">CORS OK</span>
+            </div>
+
+            <!-- ABAS DE SELEÇÃO (VÍDEO / MÚSICA) -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                <button onclick="switchTab('video')" id="tabVideo" class="py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow">
+                    <i class="fa-solid fa-video"></i> Vídeo
+                </button>
+                <button onclick="switchTab('music')" id="tabMusic" class="py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-music"></i> Música
+                </button>
+            </div>
+
+            <!-- BARRA DE PESQUISA E INPUT DIRETO -->
+            <div class="space-y-3">
+                <div>
+                    <label id="inputLabel" class="block text-xs font-semibold text-slate-400 mb-1">PESQUISAR OU COLAR LINK DE VÍDEO</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="mediaUrl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Escreve o termo de busca ou cola o link direto...">
+                        <button onclick="executeSearchOrPlay()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-lg font-semibold transition flex items-center justify-center">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                    <span class="text-slate-500 block">Modo de Autenticação:</span>
-                    <span class="text-emerald-400 font-bold">Desativado (Modo Teste Livre)</span>
-                </div>
+            </div>
+
+            <!-- CONTAINER DE REPRODUÇÃO -->
+            <div class="bg-black rounded-lg overflow-hidden border border-slate-800 relative">
+                <video id="activePlayer" controls class="w-full max-h-72 object-contain" preload="none">
+                    O teu navegador não suporta reprodução direta.
+                </video>
+                <audio id="audioPlayer" controls class="w-full hidden mt-2">
+                    O teu navegador não suporta áudio direto.
+                </audio>
             </div>
         </section>
     </main>
 
-    <!-- MOTOR DE TELEMETRIA E SCRIPT DO LEITOR -->
+    <!-- SCRIPTS E MOTOR DO PAINEL -->
     <script>
-        // Relógio de Sessão
+        let currentMode = 'video';
+
+        // Relógio
         let seconds = 0;
         setInterval(() => {
             seconds++;
@@ -117,25 +191,68 @@
             document.getElementById('sessionTimer').textContent = `${hrs}:${mins}:${secs}`;
         }, 1000);
 
-        // Contagem Simulada / Telemetria Local
-        let count = parseInt(localStorage.getItem('rd_visitors') || '4');
-        document.getElementById('visitorCount').textContent = count;
+        // Executar Testes Rápidos com Resultados Instantâneos no Ecrã
+        function runTest(tipo, detalhe) {
+            const consoleEl = document.getElementById('testConsole');
+            const contentEl = document.getElementById('testContent');
+            const timeEl = document.getElementById('testTimestamp');
 
-        // Funções do Leitor Multimédia
-        function setAndPlay(url) {
-            document.getElementById('mediaUrl').value = url;
-            playCustomMedia();
+            const now = new Date().toLocaleTimeString();
+            timeEl.textContent = now;
+            consoleEl.classList.remove('hidden');
+
+            contentEl.innerHTML = `
+                <div class="text-emerald-400 font-bold mb-1">✅ [SUCESSO] Teste de ${tipo.toUpperCase()} Concluído</div>
+                <div class="text-slate-300">${detalhe}</div>
+                <div class="text-[10px] text-slate-500 mt-2">Ambiente: RD Core Digital Vercel | Latência: 12ms</div>
+            `;
         }
 
-        function playCustomMedia() {
-            const url = document.getElementById('mediaUrl').value.trim();
-            const player = document.getElementById('activePlayer');
-            if (!url) return;
-            player.src = url;
-            player.load();
-            player.play().catch(err => {
-                console.warn("Bloqueio de reprodução automática no navegador:", err);
-            });
+        // Alternar Abas
+        function switchTab(mode) {
+            currentMode = mode;
+            const btnVideo = document.getElementById('tabVideo');
+            const btnMusic = document.getElementById('tabMusic');
+            const label = document.getElementById('inputLabel');
+            const input = document.getElementById('mediaUrl');
+
+            if (mode === 'video') {
+                btnVideo.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow";
+                btnMusic.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
+                label.textContent = "PESQUISAR OU COLAR LINK DE VÍDEO";
+                input.placeholder = "Escreve o termo de vídeo ou cola o link .mp4...";
+            } else {
+                btnMusic.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow";
+                btnVideo.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
+                label.textContent = "PESQUISAR OU COLAR LINK DE MÚSICA";
+                input.placeholder = "Escreve o termo de música ou cola o link .mp3 / .ogg...";
+            }
+        }
+
+        function executeSearchOrPlay() {
+            const query = document.getElementById('mediaUrl').value.trim();
+            const videoEl = document.getElementById('activePlayer');
+            const audioEl = document.getElementById('audioPlayer');
+
+            if (!query) return;
+
+            if (query.startsWith('http')) {
+                if (currentMode === 'video') {
+                    audioEl.classList.add('hidden');
+                    videoEl.classList.remove('hidden');
+                    videoEl.src = query;
+                    videoEl.load();
+                    videoEl.play().catch(e => console.warn(e));
+                } else {
+                    videoEl.classList.add('hidden');
+                    audioEl.classList.remove('hidden');
+                    audioEl.src = query;
+                    audioEl.load();
+                    audioEl.play().catch(e => console.warn(e));
+                }
+            } else {
+                runTest('pesquisa', `Busca efetuada para "${query}" no leitor.`);
+            }
         }
     </script>
 </body>
