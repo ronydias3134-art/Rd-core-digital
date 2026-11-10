@@ -3,181 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Cor Digital — Ecossistema Autónomo</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>RD Core Digital — Painel Operacional & Telemetria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .glass-card { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-gray-950 text-gray-100 font-sans min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
 
-    <!-- ECRÃ DE AUTENTICAÇÃO (PIN 3134) -->
-    <div id="auth-screen" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-        <div class="text-center mb-6">
-            <span class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-cyan-400 bg-cyan-950/60 rounded-full border border-cyan-800/50 uppercase">Ecossistema Autónomo</span>
-            <h1 class="text-2xl font-bold text-white tracking-tight">RD Cor Digital</h1>
-            <p class="text-sm text-slate-400 mt-1">Introduza o PIN de segurança para aceder ao motor</p>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <input type="password" id="pin-input" maxlength="4" placeholder="••••" class="w-full text-center text-2xl tracking-widest bg-slate-950 border border-slate-700 rounded-xl py-3 text-white focus:outline-none focus:border-cyan-500 transition-all">
+    <!-- BARRA SUPERIOR E STATUS -->
+    <header class="border-b border-gray-800 bg-gray-900/90 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                <h1 class="text-xl font-bold tracking-wider text-white">RD CORE <span class="text-blue-500 text-sm font-semibold border border-blue-500/40 px-2 py-0.5 rounded">v2.0 PRO</span></h1>
             </div>
-            <button onclick="verificarPin()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-xl transition-colors shadow-lg shadow-cyan-900/40">
-                Aceder ao Sistema
+            <div class="flex items-center space-x-6 text-xs text-gray-400">
+                <div class="hidden sm:block">TESOURARIA: <span class="text-emerald-400 font-mono font-bold">5.0%</span></div>
+                <div class="hidden md:block">MODO: <span class="text-amber-400 font-mono">TESTE PÚBLICO (SEM PIN)</span></div>
+                <div id="session-timer" class="font-mono text-gray-300 bg-gray-800 px-2 py-1 rounded border border-gray-700">00:00:00</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGAÇÃO ENTRE MÓDULOS -->
+    <nav class="border-b border-gray-800 bg-gray-900/50">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto">
+            <button onclick="switchTab('resumo')" id="tab-resumo" class="tab-btn active px-5 py-3 text-sm font-medium flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-chart-line"></i><span>Resumo Operacional</span>
             </button>
-            <p id="error-msg" class="text-xs text-red-400 text-center hidden">PIN incorreto. Tente novamente (3134).</p>
+            <button onclick="switchTab('multimedia')" id="tab-multimedia" class="tab-btn px-5 py-3 text-sm font-medium flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-play"></i><span>Leitor Multimédia</span>
+            </button>
+            <button onclick="switchTab('ativos')" id="tab-ativos" class="tab-btn px-5 py-3 text-sm font-medium flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-cubes"></i><span>Gestão de Ativos</span>
+            </button>
+            <button onclick="switchTab('telemetria')" id="tab-telemetria" class="tab-btn px-5 py-3 text-sm font-medium flex items-center space-x-2 whitespace-nowrap text-amber-400">
+                <i class="fa-solid fa-user-secret"></i><span>Telemetria & Acessos (<span id="badge-count">0</span>)</span>
+            </button>
         </div>
-    </div>
+    </nav>
 
-    <!-- PAINEL OPERACIONAL AVANÇADO (COMPLETO) -->
-    <div id="dashboard-screen" class="w-full max-w-6xl hidden space-y-6">
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl gap-4">
-            <div>
-                <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-800/50">ONLINE (5% Tesouraria)</span>
-                <h1 class="text-3xl font-bold text-white mt-2">RD Cor Digital</h1>
-                <p class="text-sm text-slate-400">Fundador: Ronilson Lopes Dias (Ronny) — Mindelo, Cabo Verde</p>
+    <!-- CORPO PRINCIPAL DO SISTEMA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6">
+        
+        <!-- MÓDULO 1: RESUMO OPERACIONAL -->
+        <section id="sec-resumo" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-xl border border-gray-800">
+                    <p class="text-xs text-gray-400 uppercase font-bold">Estado do Motor</p>
+                    <p class="text-2xl font-bold text-emerald-400 mt-1 flex items-center gap-2"><i class="fa-solid fa-server text-base"></i> Ativo na Vercel</p>
+                    <p class="text-xs text-gray-500 mt-2">Sincronização Nuvem OK</p>
+                </div>
+                <div class="glass-card p-5 rounded-xl border border-gray-800">
+                    <p class="text-xs text-gray-400 uppercase font-bold">Margem de Tesouraria</p>
+                    <p class="text-2xl font-bold text-blue-400 mt-1">5.0%</p>
+                    <p class="text-xs text-gray-500 mt-2">Fixa & Inegociável</p>
+                </div>
+                <div class="glass-card p-5 rounded-xl border border-gray-800">
+                    <p class="text-xs text-gray-400 uppercase font-bold">Total Visitantes Hoje</p>
+                    <p id="stat-total-visitors" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+                    <p class="text-xs text-gray-500 mt-2">Monitorização Ativa</p>
+                </div>
+                <div class="glass-card p-5 rounded-xl border border-gray-800">
+                    <p class="text-xs text-gray-400 uppercase font-bold">Ações Registadas</p>
+                    <p id="stat-total-actions" class="text-2xl font-bold text-purple-400 mt-1">0</p>
+                    <p class="text-xs text-gray-500 mt-2">Eventos Capturados</p>
+                </div>
             </div>
-            <div class="flex gap-2">
-                <button onclick="limparCache()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium px-4 py-2 rounded-xl border border-slate-700 transition-colors">
-                    Limpar Cache
-                </button>
-                <button onclick="bloquearSistema()" class="bg-red-950/50 hover:bg-red-900/50 text-red-400 text-sm font-medium px-4 py-2 rounded-xl border border-red-800/50 transition-colors">
-                    Bloquear
-                </button>
-            </div>
-        </header>
 
-        <!-- NAVEGAÇÃO DE MÓDULOS -->
-        <nav class="bg-slate-900 border border-slate-800 p-2 rounded-2xl flex gap-2">
-            <button onclick="showTab('resumo')" class="tab-btn active bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium">Resumo Operacional</button>
-            <button onclick="showTab('multimedia')" class="tab-btn bg-slate-950 text-slate-400 px-4 py-2 rounded-xl text-sm font-medium">Leitor Multimédia</button>
-            <button onclick="showTab('gestao')" class="tab-btn bg-slate-950 text-slate-400 px-4 py-2 rounded-xl text-sm font-medium">Gestão de Ativos</button>
-        </nav>
-
-        <!-- CONTEÚDO DAS ABAS -->
-        <div id="resumo" class="tab-content active space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- ESTADO DO MOTOR -->
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-3">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Estado do Motor</span>
-                    <div class="flex items-center gap-3">
-                        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <h2 class="text-xl font-semibold text-emerald-400">Sincronizado & Ativo</h2>
+            <div class="glass-card p-6 rounded-xl border border-gray-800">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-microchip text-blue-400"></i> Parâmetros do Ecossistema</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-800/80">
+                        <span class="text-gray-400 block text-xs">Domínio Principal:</span>
+                        <span class="font-mono text-blue-400 font-semibold">rd-core-digital.vercel.app</span>
                     </div>
-                    <p class="text-xs text-slate-400">Infraestrutura otimizada em nuvem com alta resiliência e baixa latência na Vercel.</p>
-                </div>
-
-                <!-- TESOURARIA OPERACIONAL -->
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-3">
-                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tesouraria Operacional</span>
-                    <div class="text-3xl font-bold text-white">5.0%</div>
-                    <p class="text-xs text-slate-400">Margem operacional fixa integrada diretamente na gestão do ecossistema.</p>
+                    <div class="bg-gray-900/60 p-4 rounded-lg border border-gray-800/80">
+                        <span class="text-gray-400 block text-xs">Modo de Autenticação:</span>
+                        <span class="font-mono text-emerald-400 font-semibold">Desativado (Modo Teste Livre)</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div id="multimedia" class="tab-content space-y-6">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                <h2 class="text-lg font-semibold text-white">Leitor Multimédia Universal</h2>
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-60 flex items-center justify-center text-slate-600 text-sm">
-                    A aguardar carregamento de ativo multimédia...
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" id="media-url" placeholder="Insira o link do ativo (MP4, MP3, etc.)..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-500">
-                    <button onclick="carregarMedia()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium px-4 py-2 rounded-xl text-sm">Carregar</button>
+        <!-- MÓDULO 2: LEITOR MULTIMÉDIA UNIVERSAL -->
+        <section id="sec-multimedia" class="hidden space-y-6">
+            <div class="glass-card p-6 rounded-xl border border-gray-800">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-photo-film text-purple-400"></i> Leitor Multimédia Universal</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">URL da Mídia (Áudio/Vídeo/Stream)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="media-url-input" placeholder="Cole aqui o link do vídeo ou áudio MP4, MP3, HLS..." class="flex-grow bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <button onclick="playMedia()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition flex items-center gap-2"><i class="fa-solid fa-play"></i> Reproduzir</button>
+                        </div>
+                    </div>
+                    <div class="w-full bg-black rounded-xl overflow-hidden aspect-video border border-gray-800 flex items-center justify-center relative" id="player-container">
+                        <div id="player-placeholder" class="text-center text-gray-500 p-6">
+                            <i class="fa-solid fa-circle-play text-5xl mb-3 text-gray-600 block"></i>
+                            <p class="text-sm">Insira o link da mídia para iniciar a reprodução</p>
+                        </div>
+                        <video id="video-player" class="w-full h-full hidden" controls></video>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div id="gestao" class="tab-content space-y-6">
-            <!-- CENTRO DE CONTROLO DE ATIVOS DIGITAIS -->
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                <h2 class="text-lg font-semibold text-white">Gestão e Controlo de Ativos Digital</h2>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="asset-input" placeholder="Insira o link ou ID do ativo digital..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500">
-                    <button onclick="executarAcaoAtivo()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-medium px-6 py-3 rounded-xl transition-colors text-sm shadow-lg shadow-cyan-900/40">
-                        Processar Ativo
-                    </button>
+        <!-- MÓDULO 3: GESTÃO DE ATIVOS DIGITAL -->
+        <section id="sec-ativos" class="hidden space-y-6">
+            <div class="glass-card p-6 rounded-xl border border-gray-800">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-cubes text-blue-400"></i> Gestão e Controlo de Ativos Digitais</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Inserir Link ou ID do Ativo</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="asset-input" placeholder="Insira o link ou ID do ativo digital..." class="flex-grow bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <button onclick="processAsset()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition flex items-center gap-2"><i class="fa-solid fa-gears"></i> Processar Ativo</button>
+                        </div>
+                    </div>
+                    <div id="asset-log" class="bg-gray-900 p-4 rounded-lg border border-gray-800 min-h-[150px] font-mono text-xs text-gray-300 space-y-2">
+                        <p class="text-gray-500 italic">// Sistema pronto. Insira um ativo para processamento.</p>
+                    </div>
                 </div>
-                <p id="asset-feedback" class="text-xs text-emerald-400 hidden">Ativo processado com sucesso na rede RD Cor Digital.</p>
             </div>
-        </div>
-    </div>
+        </section>
 
+        <!-- MÓDULO 4: PAINEL DE TELEMETRIA E RASTREIO DE UTILIZADORES (RONNY DASHBOARD) -->
+        <section id="sec-telemetria" class="hidden space-y-6">
+            <div class="glass-card p-6 rounded-xl border border-amber-500/30">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2"><i class="fa-solid fa-user-shield"></i> Painel de Controlo de Acessos & Rastreio ao Vivo</h3>
+                        <p class="text-xs text-gray-400">Registo detalhado de todas as pessoas que entram e interagem no ecossistema.</p>
+                    </div>
+                    <button onclick="clearLogs()" class="bg-red-900/50 hover:bg-red-800 border border-red-700 text-red-200 text-xs px-3 py-1.5 rounded transition">Limpar Registos</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-gray-400 bg-gray-900/80 uppercase">
+                                <th class="p-3">Data / Hora</th>
+                                <th class="p-3">Utilizador / IP Simulado</th>
+                                <th class="p-3">Navegador / Dispositivo</th>
+                                <th class="p-3">Tempo de Permanência</th>
+                                <th class="p-3">Última Ação Executada</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telemetry-table-body" class="divide-y divide-gray-800/60 font-mono text-gray-300">
+                            <!-- Inserido dinamicamente via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REGISTO DE EVENTOS BRUTOS -->
+            <div class="glass-card p-6 rounded-xl border border-gray-800">
+                <h4 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-2"><i class="fa-solid fa-terminal text-blue-400"></i> Console de Eventos em Tempo Real</h4>
+                <div id="raw-events-log" class="bg-gray-950 p-4 rounded-lg border border-gray-800 max-h-60 overflow-y-auto font-mono text-xs text-emerald-400 space-y-1">
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER OPERACIONAL -->
+    <footer class="border-t border-gray-800 bg-gray-900/80 py-4 text-center text-xs text-gray-500 mt-auto">
+        RD Core Digital © 2026 — Desenvolvido por Ronilson Lopes Dias | Tesouraria Fixa: 5.0%
+    </footer>
+
+    <!-- SISTEMA DE TELEMETRIA E LÓGICA DO PAINEL -->
     <script>
-        const PIN_MESTRE = "3134";
+        // ESTADO GLOBAL DA SESSÃO E RASTREIO
+        let sessionStartTime = Date.now();
+        let visitorId = 'VISITOR-' + Math.floor(100000 + Math.random() * 900000);
+        let userAgent = navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform;
+        let lastAction = "Entrou no Ecossistema";
+        
+        // RECUPERAR HISTÓRICO DE ACESSOS DO LOCALSTORAGE
+        let telemetryData = JSON.parse(localStorage.getItem('rd_telemetry_logs')) || [];
 
-        function verificarPin() {
-            const input = document.getElementById('pin-input').value;
-            const errorMsg = document.getElementById('error-msg');
+        // REGISTAR ENTRADA IMEDIATA
+        window.addEventListener('DOMContentLoaded', () => {
+            trackEvent("Acesso Inicial à Plataforma");
+            updateTelemetryTable();
+            startTimer();
+        });
+
+        // TEMPO DE PERMANÊNCIA AO VIVO
+        function startTimer() {
+            setInterval(() => {
+                let secondsTotal = Math.floor((Date.now() - sessionStartTime) / 1000);
+                let hrs = String(Math.floor(secondsTotal / 3600)).padStart(2, '0');
+                let mins = String(Math.floor((secondsTotal % 3600) / 60)).padStart(2, '0');
+                let secs = String(secondsTotal % 60).padStart(2, '0');
+                document.getElementById('session-timer').innerText = `${hrs}:${mins}:${secs}`;
+                
+                // Atualiza a permanência do utilizador atual no log
+                if (telemetryData.length > 0 && telemetryData[0].id === visitorId) {
+                    telemetryData[0].duration = `${mins}m ${secs}s`;
+                    saveAndRenderTelemetry();
+                }
+            }, 1000);
+        }
+
+        // REGISTAR EVENTOS DE TELEMETRIA
+        function trackEvent(actionName) {
+            lastAction = actionName;
+            let now = new Date();
+            let timestamp = now.toLocaleDateString('pt-PT') + ' ' + now.toLocaleTimeString('pt-PT');
             
-            if (input === PIN_MESTRE) {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('dashboard-screen').classList.remove('hidden');
-                errorMsg.classList.add('hidden');
-                document.getElementById('pin-input').value = '';
+            // Procura o visitante atual
+            let existingUserIndex = telemetryData.findIndex(u => u.id === visitorId);
+            
+            if (existingUserIndex > -1) {
+                telemetryData[existingUserIndex].lastAction = actionName;
+                telemetryData[existingUserIndex].lastTime = timestamp;
             } else {
-                errorMsg.classList.remove('hidden');
-                document.getElementById('pin-input').value = '';
+                telemetryData.unshift({
+                    id: visitorId,
+                    time: timestamp,
+                    device: navigator.userAgent.includes("Mobile") ? "Telemóvel (Mobile)" : "Computador (Desktop)",
+                    duration: "00m 00s",
+                    lastAction: actionName
+                });
             }
+
+            saveAndRenderTelemetry();
+            logRawEvent(`[${timestamp}] [${visitorId}] Ação: ${actionName}`);
         }
 
-        function bloquearSistema() {
-            document.getElementById('dashboard-screen').classList.add('hidden');
-            document.getElementById('auth-screen').classList.remove('hidden');
+        function saveAndRenderTelemetry() {
+            localStorage.setItem('rd_telemetry_logs', JSON.stringify(telemetryData));
+            updateTelemetryTable();
         }
 
-        function limparCache() {
-            alert("Cache limpa com sucesso! O ecossistema RD Cor Digital foi otimizado a 100%.");
-        }
+        function updateTelemetryTable() {
+            const tbody = document.getElementById('telemetry-table-body');
+            const totalVisitorsEl = document.getElementById('stat-total-visitors');
+            const totalActionsEl = document.getElementById('stat-total-actions');
+            const badgeCount = document.getElementById('badge-count');
+            
+            if (!tbody) return;
 
-        function executarAcaoAtivo() {
-            const inputVal = document.getElementById('asset-input').value;
-            const feedback = document.getElementById('asset-feedback');
-            if(inputVal.trim() !== "") {
-                feedback.classList.remove('hidden');
-                document.getElementById('asset-input').value = '';
-                setTimeout(() => feedback.classList.add('hidden'), 4000);
-            } else {
-                alert("Por favor, insira um link ou ID válido.");
-            }
-        }
+            tbody.innerHTML = '';
+            totalVisitorsEl.innerText = telemetryData.length;
+            badgeCount.innerText = telemetryData.length;
 
-        function carregarMedia() {
-            const url = document.getElementById('media-url').value;
-            if(url.trim() !== "") {
-                alert("Módulo de reprodução a carregar ativo: " + url);
-                document.getElementById('media-url').value = '';
-            } else {
-                alert("Por favor, insira um link de mídia válido.");
-            }
-        }
+            let actionCount = 0;
 
-        function showTab(tabId) {
-            // Esconder todo o conteúdo das abas
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            // Remover classe ativa de todos os botões
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-slate-800', 'text-white');
-                btn.classList.add('bg-slate-950', 'text-slate-400');
+            telemetryData.forEach(entry => {
+                actionCount++;
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition";
+                tr.innerHTML = `
+                    <td class="p-3 text-gray-400">${entry.time}</td>
+                    <td class="p-3 text-amber-400 font-bold">${entry.id} ${entry.id === visitorId ? '<span class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.5 rounded ml-1">Tu</span>' : ''}</td>
+                    <td class="p-3 text-gray-300">${entry.device}</td>
+                    <td class="p-3 text-blue-400">${entry.duration}</td>
+                    <td class="p-3 text-emerald-400">${entry.lastAction}</td>
+                `;
+                tbody.appendChild(tr);
             });
 
-            // Mostrar a aba selecionada
-            document.getElementById(tabId).classList.add('active');
-            // Ativar o botão correspondente
-            const activeBtn = event.currentTarget;
-            activeBtn.classList.add('active', 'bg-slate-800', 'text-white');
-            activeBtn.classList.remove('bg-slate-950', 'text-slate-400');
+            totalActionsEl.innerText = actionCount;
         }
 
-        document.getElementById('pin-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                verificarPin();
+        function logRawEvent(msg) {
+            const container = document.getElementById('raw-events-log');
+            if (container) {
+                let p = document.createElement('p');
+                p.innerText = msg;
+                container.prepend(p);
             }
-        });
+        }
+
+        function clearLogs() {
+            telemetryData = [];
+            localStorage.removeItem('rd_telemetry_logs');
+            trackEvent("Registos Limpos pelo Administrador");
+        }
+
+        // NAVEGAÇÃO DE TABS
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            trackEvent(`Navegou para o módulo: ${tabId.toUpperCase()}`);
+        }
+
+        // MÓDULO MULTIMÉDIA
+        function playMedia() {
+            const url = document.getElementById('media-url-input').value.trim();
+            if (!url) {
+                alert('Por favor, insira um link de mídia válido.');
+                return;
+            }
+            const video = document.getElementById('video-player');
+            const placeholder = document.getElementById('player-placeholder');
+
+            placeholder.classList.add('hidden');
+            video.classList.remove('hidden');
+            video.src = url;
+            video.play();
+
+            trackEvent(`Reproduziu mídia: ${url.substring(0, 30)}...`);
+        }
+
+        // MÓDULO DE ATIVOS
+        function processAsset() {
+            const input = document.getElementById('asset-input').value.trim();
+            const log = document.getElementById('asset-log');
+
+            if (!input) {
+                alert('Por favor, insira um link ou ID válido.');
+                trackEvent('Tentativa falhada de processamento de ativo (Campo Vazio)');
+                return;
+            }
+
+            let entry = document.createElement('p');
+            entry.innerHTML = `<span class="text-blue-400">[${new Date().toLocaleTimeString()}]</span> Ativo Processado com Sucesso: <span class="text-amber-300 font-bold">${input}</span> | Status: <span class="text-emerald-400">VALIDADO (5.0% Margem)</span>`;
+            log.prepend(entry);
+
+            trackEvent(`Processou o Ativo: ${input}`);
+            document.getElementById('asset-input').value = '';
+        }
     </script>
 </body>
 </html>
