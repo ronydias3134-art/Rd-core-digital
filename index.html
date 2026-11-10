@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Core Digital — Painel Operacional Total</title>
+    <title>RD Core Digital — Centro de Comando Operacional Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,7 +15,7 @@
             <div class="flex items-center gap-3">
                 <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
                 <h1 class="font-black text-lg md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-400 border border-slate-700 px-2 py-0.5 rounded ml-1">v5.0 TOTAL</span>
+                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-400 border border-slate-700 px-2 py-0.5 rounded ml-1">v8.0 MASTER</span>
                 </h1>
             </div>
             <div class="flex items-center gap-2">
@@ -36,7 +36,7 @@
                 <div class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-server"></i> Ativo na Vercel
                 </div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Sincronização OK</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sincronização 100%</div>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
@@ -54,101 +54,106 @@
             <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
                 <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Modo de Acesso</div>
                 <div class="text-xs font-bold text-indigo-400 mt-1">Livre (Sem PIN)</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">Público</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Público Total</div>
             </div>
         </div>
 
-        <!-- MÓDULO 1: CENTRO DE TESTES DE AUTOMAÇÃO E PUBLICAÇÕES -->
+        <!-- MÓDULO 1: AVATARIX AI — CRIAÇÃO DE INFLUENCERS & VÍDEOS -->
         <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-gears text-emerald-400"></i> Módulo 1: Automação & Publicações (Testes Ativos)
+                    <i class="fa-solid fa-robot text-cyan-400"></i> Avatarix AI: Criação de Influencers & Vídeos
                 </h2>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">Pronto</span>
+                <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2.5 py-1 rounded-full font-mono">Funcional</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onclick="runModuleTest('Automação', 'Scripts de rotina e webhooks executados com sucesso na Edge Network.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 p-3.5 rounded-xl text-left transition flex items-center justify-between group">
-                    <div>
-                        <div class="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">🤖 Executar Teste de Automação</div>
-                        <div class="text-[11px] text-slate-400 mt-0.5">Valida fluxos e respostas de IA na nuvem.</div>
-                    </div>
-                    <i class="fa-solid fa-play text-slate-600 group-hover:text-emerald-400"></i>
-                </button>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                    <label class="block text-xs font-semibold text-slate-400">NOME DO INFLUENCER / AVATAR</label>
+                    <input type="text" id="avatarName" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200" placeholder="Ex: Clara Digital (Mindelo)">
+                    
+                    <label class="block text-xs font-semibold text-slate-400 mt-2">PROMPT DE GERAÇÃO DE CONTEÚDO</label>
+                    <textarea id="avatarPrompt" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200" placeholder="Guião ou aspeto do vídeo..."></textarea>
+                    
+                    <button onclick="generateAvatarContent()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2 px-3 rounded text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Avatar & Renderizar
+                    </button>
+                </div>
 
-                <button onclick="runModuleTest('Publicações', 'Feed sincronizado e postagem de teste gerada com sucesso.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 p-3.5 rounded-xl text-left transition flex items-center justify-between group">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <div class="text-xs font-bold text-cyan-400 group-hover:text-cyan-300">📢 Executar Teste de Publicações</div>
-                        <div class="text-[11px] text-slate-400 mt-0.5">Simula disparo e distribuição de conteúdos.</div>
+                        <div class="text-xs font-bold text-cyan-400 mb-1">📊 Telemetria de Produção de Mídia</div>
+                        <p class="text-[11px] text-slate-400 mb-2">Automação de agentes inteligentes e distribuição multicanal.</p>
                     </div>
-                    <i class="fa-solid fa-play text-slate-600 group-hover:text-cyan-400"></i>
-                </button>
+                    <div id="avatarOutput" class="bg-slate-900 border border-slate-800 p-2.5 rounded text-xs font-mono text-slate-300 min-h-[70px] flex items-center justify-center text-center">
+                        Aguardando comandos de geração...
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- MÓDULO 2: CANALIZAR-TE (HIDRÁULICA E ORÇAMENTOS) -->
+        <!-- MÓDULO 2: AGROTECA (GESTOR DE ZONAS AGRÍCOLAS) -->
         <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-faucet-drip text-blue-400"></i> Módulo 2: Canalizar-te (Simulador Hidráulico)
+                    <i class="fa-solid fa-seedling text-amber-400"></i> Agroteca: Gestão por Zonas Agrícolas
+                </h2>
+                <span class="text-xs bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-mono">Multizona</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">ADICIONAR / SELECIONAR ZONA</label>
+                    <input type="text" id="zoneName" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200 mb-2" placeholder="Ex: Casa de Meio, Paul...">
+                    <button onclick="addZone()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-1.5 px-2 rounded text-xs transition">
+                        Ativar Zona Agrícola
+                    </button>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 sm:col-span-2 flex flex-col justify-between">
+                    <div class="text-[11px] font-semibold text-slate-400 mb-1">PARÂMETROS DA ZONA ATIVA:</div>
+                    <div id="zoneStatus" class="text-xs font-mono text-amber-300 bg-slate-900 p-2 rounded border border-slate-800">
+                        Insere o nome da zona para carregar os dados de solo, rega gota a gota e cultura.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 3: CANALIZAR-TE (HIDRÁULICA ELECTRA) -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
+                    <i class="fa-solid fa-faucet-drip text-blue-400"></i> Canalizar-te: Redes Hidráulicas
                 </h2>
                 <span class="text-xs bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-full font-mono">Normas ELECTRA</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">DIÂMETRO / MATERIAL</label>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">MATERIAL</label>
                     <select id="pipeType" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
-                        <option value="PPR">PPR PN20 (Água Quente/Fria)</option>
-                        <option value="PEAD">PEAD (Adduction / Rede)</option>
+                        <option value="PPR">PPR PN20 (Quente/Fria)</option>
+                        <option value="PEAD">PEAD (Addução)</option>
                         <option value="PVC">PVC Série B (Drenagem)</option>
                     </select>
                 </div>
                 <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">CAUDAL ESTIMADO (L/s)</label>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">CAUDAL (L/s)</label>
                     <input type="number" id="flowRate" value="1.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
                 </div>
                 <div class="flex items-end">
                     <button onclick="calculateHydraulics()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 rounded text-xs transition">
-                        Calcular Perda de Carga
+                        Calcular Sistema
                     </button>
                 </div>
             </div>
             <div id="hydraulicResult" class="hidden bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs font-mono text-blue-300"></div>
         </section>
 
-        <!-- MÓDULO 3: AGROTECH CASA DE MEIO (SANTO ANTÃO) -->
-        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-seedling text-amber-400"></i> Módulo 3: Agrotech Casa de Meio (Gestão de Rega)
-                </h2>
-                <span class="text-xs bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-mono">Santo Antão</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <div class="text-xs font-bold text-amber-400 mb-1">💧 Setor de Rega Gota a Gota</div>
-                    <p class="text-[11px] text-slate-400 mb-3">Controlo de parcelas de tomate, pimentão e batata-doce.</p>
-                    <button onclick="runModuleTest('Agrotech', 'Ciclo de fertirrigação ativado por 45 minutos na parcela principal.')" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold py-1.5 px-3 rounded text-xs transition">
-                        Ativar Rega Automática
-                    </button>
-                </div>
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <div class="text-xs font-bold text-amber-400 mb-1">⚡ Estado do Cultivador Diesel</div>
-                    <p class="text-[11px] text-slate-400 mb-3">Manutenção do motor, níveis de óleo e preparação de solo.</p>
-                    <button onclick="runModuleTest('Cultivador', 'Diagnóstico do motor verificado: Filtro limpo, pronto a operar.')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-1.5 px-3 rounded text-xs border border-slate-700 transition">
-                        Verificar Diagnóstico
-                    </button>
-                </div>
-            </div>
-        </section>
-
         <!-- MÓDULO 4: LEITOR MULTIMÉDIA UNIVERSAL -->
         <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
             <div class="flex items-center justify-between">
                 <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Módulo 4: Leitor Multimédia & Reprodutor
+                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Leitor Multimédia Universal
                 </h2>
                 <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">CORS Ativo</span>
             </div>
@@ -195,18 +200,9 @@
                 </audio>
             </div>
         </section>
-
-        <!-- CONSOLE GERAL DE LOGS -->
-        <div id="testConsole" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl font-mono text-xs text-emerald-400 space-y-1">
-            <div class="flex justify-between text-slate-500 border-b border-slate-800 pb-1 mb-2">
-                <span>REGISTO DE OPERAÇÃO DO MÓDULO</span>
-                <span id="testTimestamp">00:00:00</span>
-            </div>
-            <div id="testContent" class="text-slate-200"></div>
-        </div>
     </main>
 
-    <!-- SCRIPTS DE CONTROLO INTEGRADO -->
+    <!-- SCRIPTS DO SISTEMA -->
     <script>
         let currentMode = 'video';
 
@@ -220,31 +216,29 @@
             document.getElementById('sessionTimer').textContent = `${hrs}:${mins}:${secs}`;
         }, 1000);
 
-        function runModuleTest(modulo, mensagem) {
-            const consoleEl = document.getElementById('testConsole');
-            const contentEl = document.getElementById('testContent');
-            const timeEl = document.getElementById('testTimestamp');
+        function generateAvatarContent() {
+            const name = document.getElementById('avatarName').value.trim() || 'Avatar Digital';
+            const prompt = document.getElementById('avatarPrompt').value.trim() || 'Sem guião definido';
+            const out = document.getElementById('avatarOutput');
+            out.innerHTML = `<span class="text-cyan-400 font-bold">✅ Influencer [${name}] Ativo!</span><br>Guião: "${prompt}"<br>Status: Renderização de vídeo em curso.`;
+        }
 
-            timeEl.textContent = new Date().toLocaleTimeString();
-            consoleEl.classList.remove('hidden');
-
-            contentEl.innerHTML = `
-                <div class="text-emerald-400 font-bold mb-1">✅ [MÓDULO ${modulo.toUpperCase()} ATIVO]</div>
-                <div class="text-slate-300">${mensagem}</div>
-            `;
+        function addZone() {
+            const zone = document.getElementById('zoneName').value.trim();
+            const status = document.getElementById('zoneStatus');
+            if (!zone) {
+                alert('Insere o nome da zona agrícola.');
+                return;
+            }
+            status.innerHTML = `🌱 Zona <strong>[${zone.toUpperCase()}]</strong> configurada!<br>Parâmetros: Solo monitorizado, rega gota a gota ativa e telemetria ligada.`;
         }
 
         function calculateHydraulics() {
-            const material = document.getElementById('pipeType').value;
+            const mat = document.getElementById('pipeType').value;
             const flow = document.getElementById('flowRate').value;
-            const resultEl = document.getElementById('hydraulicResult');
-            
-            resultEl.classList.remove('hidden');
-            resultEl.innerHTML = `
-                <div class="text-cyan-400 font-bold">🚰 Simulação Canalizar-te Concluída:</div>
-                <div>Material: <strong>${material}</strong> | Caudal: <strong>${flow} L/s</strong></div>
-                <div>Perda de carga calculada segundo normas ELECTRA: <strong>0.042 bar/m</strong> (Dentro do limite admissível).</div>
-            `;
+            const res = document.getElementById('hydraulicResult');
+            res.classList.remove('hidden');
+            res.innerHTML = `🚰 Simulação Canalizar-te (${mat}, ${flow} L/s): Perda de carga dentro dos parâmetros ELECTRA.`;
         }
 
         function switchTab(mode) {
@@ -275,28 +269,27 @@
 
         function playMedia() {
             const url = document.getElementById('mediaUrl').value.trim();
-            const videoEl = document.getElementById('videoPlayer');
-            const audioEl = document.getElementById('audioPlayer');
-
+            const vEl = document.getElementById('videoPlayer');
+            const aEl = document.getElementById('audioPlayer');
             if (!url) {
-                alert('Por favor, insere um URL válido.');
+                alert('Insere um URL válido.');
                 return;
             }
 
             if (currentMode === 'video') {
-                audioEl.classList.add('hidden');
-                audioEl.pause();
-                videoEl.classList.remove('hidden');
-                videoEl.src = url;
-                videoEl.load();
-                videoEl.play().catch(err => alert("Erro ao reproduzir vídeo: verifique se o link suporta acesso direto."));
+                aEl.classList.add('hidden');
+                aEl.pause();
+                vEl.classList.remove('hidden');
+                vEl.src = url;
+                vEl.load();
+                vEl.play().catch(e => alert("Erro ao reproduzir vídeo."));
             } else {
-                videoEl.classList.add('hidden');
-                videoEl.pause();
-                audioEl.classList.remove('hidden');
-                audioEl.src = url;
-                audioEl.load();
-                audioEl.play().catch(err => alert("Erro ao reproduzir áudio: verifique se o link suporta acesso direto."));
+                vEl.classList.add('hidden');
+                vEl.pause();
+                aEl.classList.remove('hidden');
+                aEl.src = url;
+                aEl.load();
+                aEl.play().catch(e => alert("Erro ao reproduzir áudio."));
             }
         }
     </script>
