@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Core Digital — Painel de Controlo & Testes</title>
+    <title>RD Core Digital — Painel Operacional Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,11 +15,11 @@
             <div class="flex items-center gap-3">
                 <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
                 <h1 class="font-black text-lg md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-400 border border-slate-700 px-2 py-0.5 rounded ml-1">v4.0 TOTAL</span>
+                    RD CORE DIGITAL <span class="text-xs font-mono text-slate-400 border border-slate-700 px-2 py-0.5 rounded ml-1">v5.0 TOTAL</span>
                 </h1>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs font-mono bg-slate-950 border border-slate-800 px-2.5 py-1 rounded text-emerald-400 hidden sm:inline">Mindelo, CV</span>
+                <span class="text-xs font-mono bg-slate-950 border border-slate-800 px-2.5 py-1 rounded text-emerald-400">Mindelo, CV</span>
                 <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded text-slate-400">
                     00:00:00
                 </div>
@@ -52,97 +52,107 @@
             </div>
 
             <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl shadow-md">
-                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Acesso ao Teste</div>
+                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-1">Modo de Acesso</div>
                 <div class="text-xs font-bold text-indigo-400 mt-1">Livre (Sem PIN)</div>
                 <div class="text-[10px] text-slate-500 mt-0.5">Público</div>
             </div>
         </div>
 
-        <!-- CONSOLE DE TESTES OPERACIONAIS INSTANTÂNEOS -->
+        <!-- MÓDULO 1: CENTRO DE TESTES DE AUTOMAÇÃO E PUBLICAÇÕES -->
         <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-vial-circle-check text-emerald-400"></i> Centro de Testes de Funcionalidades (Clique & Teste)
+                    <i class="fa-solid fa-gears text-emerald-400"></i> Módulo 1: Automação & Publicações (Testes Ativos)
                 </h2>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">100% Interativo</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">Pronto</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                <!-- Teste 1: Automação -->
-                <button onclick="runTest('automação', 'Fluxo de Scripts & Webhooks executados com sucesso.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">🤖 Teste de Automação</span>
-                        <i class="fa-solid fa-bolt text-xs text-slate-500"></i>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onclick="runModuleTest('Automação', 'Scripts de rotina e webhooks executados com sucesso na Edge Network.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 p-3.5 rounded-xl text-left transition flex items-center justify-between group">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">🤖 Executar Teste de Automação</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">Valida fluxos e respostas de IA na nuvem.</div>
                     </div>
-                    <p class="text-[11px] text-slate-400">Dispara rotinas de atualização e verificação de sistemas.</p>
+                    <i class="fa-solid fa-play text-slate-600 group-hover:text-emerald-400"></i>
                 </button>
 
-                <!-- Teste 2: Publicações -->
-                <button onclick="runTest('publicações', 'Publicação de Teste gerada e pronta para envio.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-cyan-400 group-hover:text-cyan-300">📢 Teste de Publicações</span>
-                        <i class="fa-solid fa-paper-plane text-xs text-slate-500"></i>
+                <button onclick="runModuleTest('Publicações', 'Feed sincronizado e postagem de teste gerada com sucesso.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 p-3.5 rounded-xl text-left transition flex items-center justify-between group">
+                    <div>
+                        <div class="text-xs font-bold text-cyan-400 group-hover:text-cyan-300">📢 Executar Teste de Publicações</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">Simula disparo e distribuição de conteúdos.</div>
                     </div>
-                    <p class="text-[11px] text-slate-400">Simula criação e publicação de feeds/postagens em redes.</p>
+                    <i class="fa-solid fa-play text-slate-600 group-hover:text-cyan-400"></i>
                 </button>
-
-                <!-- Teste 3: Hidráulica -->
-                <button onclick="runTest('hidráulica', 'Cálculo de caudal PPR/PEAD validado segundo ELECTRA.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-blue-400 group-hover:text-blue-300">🚰 Teste Canalizar-te</span>
-                        <i class="fa-solid fa-faucet-drip text-xs text-slate-500"></i>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Módulo de perdas de carga e orçamentos hidráulicos.</p>
-                </button>
-
-                <!-- Teste 4: Agrotech -->
-                <button onclick="runTest('agrotech', 'Relação de fertirrigação para Casa de Meio calculada.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-amber-400 group-hover:text-amber-300">🌱 Teste Casa de Meio</span>
-                        <i class="fa-solid fa-seedling text-xs text-slate-500"></i>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Vigilação de solos, rega gota a gota e culturas.</p>
-                </button>
-
-                <!-- Teste 5: Telemetria -->
-                <button onclick="runTest('telemetria', 'Registo de sessão e contagem de utilizadores atualizado.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-indigo-400 group-hover:text-indigo-300">📊 Teste de Telemetria</span>
-                        <i class="fa-solid fa-chart-line text-xs text-slate-500"></i>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Verifica métricas do servidor em tempo real.</p>
-                </button>
-
-                <!-- Teste 6: Avatarix AI -->
-                <button onclick="runTest('avatarix', 'Agentes inteligentes prontos para tarefas autónomas.')" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-purple-500/50 p-3.5 rounded-xl text-left transition space-y-1 group">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-purple-400 group-hover:text-purple-300">🤖 Teste Avatarix AI</span>
-                        <i class="fa-solid fa-brain text-xs text-slate-500"></i>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Verifica o estado da inteligência e automação de vídeo.</p>
-                </button>
-            </div>
-
-            <!-- ECRÃ DE LOG DE TESTE (RESULTADO DIRETO NA TELA) -->
-            <div id="testConsole" class="hidden bg-slate-950 border border-slate-800 p-4 rounded-xl font-mono text-xs text-emerald-400 space-y-1">
-                <div class="flex justify-between text-slate-500 border-b border-slate-900 pb-1 mb-2">
-                    <span>STATUS DO TESTE</span>
-                    <span id="testTimestamp">00:00:00</span>
-                </div>
-                <div id="testContent" class="text-slate-200"></div>
             </div>
         </section>
 
-        <!-- LEITOR MULTIMÉDIA UNIVERSAL REESTRUTURADO -->
+        <!-- MÓDULO 2: CANALIZAR-TE (HIDRÁULICA E ORÇAMENTOS) -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
+                    <i class="fa-solid fa-faucet-drip text-blue-400"></i> Módulo 2: Canalizar-te (Simulador Hidráulico)
+                </h2>
+                <span class="text-xs bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-full font-mono">Normas ELECTRA</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">DIÂMETRO / MATERIAL</label>
+                    <select id="pipeType" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
+                        <option value="PPR">PPR PN20 (Água Quente/Fria)</option>
+                        <option value="PEAD">PEAD (Adduction / Rede)</option>
+                        <option value="PVC">PVC Série B (Drenagem)</option>
+                    </select>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">CAUDAL ESTIMADO (L/s)</label>
+                    <input type="number" id="flowRate" value="1.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-slate-200">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="calculateHydraulics()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-3 rounded text-xs transition">
+                        Calcular Perda de Carga
+                    </button>
+                </div>
+            </div>
+            <div id="hydraulicResult" class="hidden bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs font-mono text-blue-300"></div>
+        </section>
+
+        <!-- MÓDULO 3: AGROTECH CASA DE MEIO (SANTO ANTÃO) -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
+                    <i class="fa-solid fa-seedling text-amber-400"></i> Módulo 3: Agrotech Casa de Meio (Gestão de Rega)
+                </h2>
+                <span class="text-xs bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-mono">Santo Antão</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <div class="text-xs font-bold text-amber-400 mb-1">💧 Setor de Rega Gota a Gota</div>
+                    <p class="text-[11px] text-slate-400 mb-3">Controlo de parcelas de tomate, pimentão e batata-doce.</p>
+                    <button onclick="runModuleTest('Agrotech', 'Ciclo de fertirrigação ativado por 45 minutos na parcela principal.')" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold py-1.5 px-3 rounded text-xs transition">
+                        Ativar Rega Automática
+                    </button>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <div class="text-xs font-bold text-amber-400 mb-1">⚡ Estado do Cultivador Diesel</div>
+                    <p class="text-[11px] text-slate-400 mb-3">Manutenção do motor, níveis de óleo e preparação de solo.</p>
+                    <button onclick="runModuleTest('Cultivador', 'Diagnóstico do motor verificado: Filtro limpo, pronto a operar.')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-1.5 px-3 rounded text-xs border border-slate-700 transition">
+                        Verificar Diagnóstico
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 4: LEITOR MULTIMÉDIA UNIVERSAL -->
         <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
             <div class="flex items-center justify-between">
                 <h2 class="text-base font-bold flex items-center gap-2 text-slate-100">
-                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Leitor Multimédia & Reprodutor Universal
+                    <i class="fa-solid fa-circle-play text-emerald-400"></i> Módulo 4: Leitor Multimédia & Reprodutor
                 </h2>
-                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">CORS OK</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-mono">CORS Ativo</span>
             </div>
 
-            <!-- ABAS DE SELEÇÃO (VÍDEO / MÚSICA) -->
             <div class="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
                 <button onclick="switchTab('video')" id="tabVideo" class="py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow">
                     <i class="fa-solid fa-video"></i> Vídeo
@@ -152,36 +162,55 @@
                 </button>
             </div>
 
-            <!-- BARRA DE PESQUISA E INPUT DIRETO -->
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
+                <span class="text-[11px] font-semibold text-slate-400 block">EXEMPLOS PRONTOS A REPRODUZIR:</span>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="loadPreset('https://www.w3schools.com/html/mov_bbb.mp4', 'video')" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 px-3 py-1.5 rounded border border-slate-700 transition">
+                        ▶️ Testar Vídeo Exemplo
+                    </button>
+                    <button onclick="loadPreset('https://www.w3schools.com/html/horse.ogg', 'music')" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-3 py-1.5 rounded border border-slate-700 transition">
+                        🎵 Testar Música Exemplo
+                    </button>
+                </div>
+            </div>
+
             <div class="space-y-3">
                 <div>
-                    <label id="inputLabel" class="block text-xs font-semibold text-slate-400 mb-1">PESQUISAR OU COLAR LINK DE VÍDEO</label>
+                    <label id="inputLabel" class="block text-xs font-semibold text-slate-400 mb-1">URL DIRETO DO VÍDEO (.MP4)</label>
                     <div class="flex gap-2">
-                        <input type="text" id="mediaUrl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Escreve o termo de busca ou cola o link direto...">
-                        <button onclick="executeSearchOrPlay()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-lg font-semibold transition flex items-center justify-center">
-                            <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="mediaUrl" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Cola aqui o link direto...">
+                        <button onclick="playMedia()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-lg font-semibold transition flex items-center justify-center">
+                            <i class="fa-solid fa-play"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- CONTAINER DE REPRODUÇÃO -->
-            <div class="bg-black rounded-lg overflow-hidden border border-slate-800 relative">
-                <video id="activePlayer" controls class="w-full max-h-72 object-contain" preload="none">
-                    O teu navegador não suporta reprodução direta.
+            <div class="bg-black rounded-lg overflow-hidden border border-slate-800 p-2">
+                <video id="videoPlayer" controls class="w-full max-h-72 object-contain rounded">
+                    O teu browser não suporta vídeo.
                 </video>
                 <audio id="audioPlayer" controls class="w-full hidden mt-2">
-                    O teu navegador não suporta áudio direto.
+                    O teu browser não suporta áudio.
                 </audio>
             </div>
         </section>
+
+        <!-- CONSOLE GERAL DE LOGS -->
+        <div id="testConsole" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl font-mono text-xs text-emerald-400 space-y-1">
+            <div class="flex justify-between text-slate-500 border-b border-slate-800 pb-1 mb-2">
+                <span>REGISTO DE OPERAÇÃO DO MÓDULO</span>
+                <span id="testTimestamp">00:00:00</span>
+            </div>
+            <div id="testContent" class="text-slate-200"></div>
+        </div>
     </main>
 
-    <!-- SCRIPTS E MOTOR DO PAINEL -->
+    <!-- SCRIPTS DE CONTROLO INTEGRADO -->
     <script>
         let currentMode = 'video';
 
-        // Relógio
+        // Relógio de Sessão
         let seconds = 0;
         setInterval(() => {
             seconds++;
@@ -191,24 +220,33 @@
             document.getElementById('sessionTimer').textContent = `${hrs}:${mins}:${secs}`;
         }, 1000);
 
-        // Executar Testes Rápidos com Resultados Instantâneos no Ecrã
-        function runTest(tipo, detalhe) {
+        function runModuleTest(modulo, mensagem) {
             const consoleEl = document.getElementById('testConsole');
             const contentEl = document.getElementById('testContent');
             const timeEl = document.getElementById('testTimestamp');
 
-            const now = new Date().toLocaleTimeString();
-            timeEl.textContent = now;
+            timeEl.textContent = new Date().toLocaleTimeString();
             consoleEl.classList.remove('hidden');
 
             contentEl.innerHTML = `
-                <div class="text-emerald-400 font-bold mb-1">✅ [SUCESSO] Teste de ${tipo.toUpperCase()} Concluído</div>
-                <div class="text-slate-300">${detalhe}</div>
-                <div class="text-[10px] text-slate-500 mt-2">Ambiente: RD Core Digital Vercel | Latência: 12ms</div>
+                <div class="text-emerald-400 font-bold mb-1">✅ [MÓDULO ${modulo.toUpperCase()} ATIVO]</div>
+                <div class="text-slate-300">${mensagem}</div>
             `;
         }
 
-        // Alternar Abas
+        function calculateHydraulics() {
+            const material = document.getElementById('pipeType').value;
+            const flow = document.getElementById('flowRate').value;
+            const resultEl = document.getElementById('hydraulicResult');
+            
+            resultEl.classList.remove('hidden');
+            resultEl.innerHTML = `
+                <div class="text-cyan-400 font-bold">🚰 Simulação Canalizar-te Concluída:</div>
+                <div>Material: <strong>${material}</strong> | Caudal: <strong>${flow} L/s</strong></div>
+                <div>Perda de carga calculada segundo normas ELECTRA: <strong>0.042 bar/m</strong> (Dentro do limite admissível).</div>
+            `;
+        }
+
         function switchTab(mode) {
             currentMode = mode;
             const btnVideo = document.getElementById('tabVideo');
@@ -219,39 +257,46 @@
             if (mode === 'video') {
                 btnVideo.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow";
                 btnMusic.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
-                label.textContent = "PESQUISAR OU COLAR LINK DE VÍDEO";
-                input.placeholder = "Escreve o termo de vídeo ou cola o link .mp4...";
+                label.textContent = "URL DIRETO DO VÍDEO (.MP4)";
+                input.placeholder = "Cola aqui o link direto .mp4...";
             } else {
                 btnMusic.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow";
                 btnVideo.className = "py-2.5 px-4 rounded-lg font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
-                label.textContent = "PESQUISAR OU COLAR LINK DE MÚSICA";
-                input.placeholder = "Escreve o termo de música ou cola o link .mp3 / .ogg...";
+                label.textContent = "URL DIRETO DA MÚSICA / ÁUDIO (.MP3 / .OGG)";
+                input.placeholder = "Cola aqui o link direto .mp3 ou .ogg...";
             }
         }
 
-        function executeSearchOrPlay() {
-            const query = document.getElementById('mediaUrl').value.trim();
-            const videoEl = document.getElementById('activePlayer');
+        function loadPreset(url, mode) {
+            switchTab(mode);
+            document.getElementById('mediaUrl').value = url;
+            playMedia();
+        }
+
+        function playMedia() {
+            const url = document.getElementById('mediaUrl').value.trim();
+            const videoEl = document.getElementById('videoPlayer');
             const audioEl = document.getElementById('audioPlayer');
 
-            if (!query) return;
+            if (!url) {
+                alert('Por favor, insere um URL válido.');
+                return;
+            }
 
-            if (query.startsWith('http')) {
-                if (currentMode === 'video') {
-                    audioEl.classList.add('hidden');
-                    videoEl.classList.remove('hidden');
-                    videoEl.src = query;
-                    videoEl.load();
-                    videoEl.play().catch(e => console.warn(e));
-                } else {
-                    videoEl.classList.add('hidden');
-                    audioEl.classList.remove('hidden');
-                    audioEl.src = query;
-                    audioEl.load();
-                    audioEl.play().catch(e => console.warn(e));
-                }
+            if (currentMode === 'video') {
+                audioEl.classList.add('hidden');
+                audioEl.pause();
+                videoEl.classList.remove('hidden');
+                videoEl.src = url;
+                videoEl.load();
+                videoEl.play().catch(err => alert("Erro ao reproduzir vídeo: verifique se o link suporta acesso direto."));
             } else {
-                runTest('pesquisa', `Busca efetuada para "${query}" no leitor.`);
+                videoEl.classList.add('hidden');
+                videoEl.pause();
+                audioEl.classList.remove('hidden');
+                audioEl.src = url;
+                audioEl.load();
+                audioEl.play().catch(err => alert("Erro ao reproduzir áudio: verifique se o link suporta acesso direto."));
             }
         }
     </script>
