@@ -33,7 +33,7 @@
                 </div>
                 <div>
                     <h1 class="font-black text-base md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent flex items-center gap-2">
-                        RD CORE DIGITAL <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">v20.1 GLOBAL</span>
+                        RD CORE DIGITAL <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">v20.2 GLOBAL</span>
                     </h1>
                 </div>
             </div>
@@ -58,8 +58,8 @@
 
             <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-wallet text-cyan-400"></i> Tesouraria</div>
-                <div class="text-2xl font-black text-cyan-400">40.0%</div>
-                <div class="text-[10px] text-slate-500 mt-1 font-mono"> Strict Margin</div>
+                <div class="text-2xl font-black text-cyan-400">5.0%</div>
+                <div class="text-[10px] text-slate-500 mt-1 font-mono">Strict Margin</div>
             </div>
 
             <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <!-- MÓDULO NOVO: ÍMAN DE REDES SOCIAIS (SOCIAL MEDIA MAGNET) -->
+        <!-- MÓDULO: ÍMAN DE REDES SOCIAIS (SOCIAL MEDIA MAGNET) -->
         <section class="bg-cardbg border border-bordercolor rounded-2xl p-4 md:p-5 shadow-xl">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
@@ -213,7 +213,7 @@
             </div>
         </section>
 
-        <!-- MÓDULO 2: AGROTECH GLOBAL SUITE (GLOBAL) -->
+        <!-- MÓDULO 2: AGROTECH GLOBAL SUITE -->
         <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
                 <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
@@ -248,7 +248,7 @@
             </div>
         </section>
 
-        <!-- MÓDULO 3: CANALIZAR-TE GLOBAL (SEM ELECTRA NO RÓTULO) -->
+        <!-- MÓDULO 3: CANALIZAR-TE GLOBAL -->
         <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
                 <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
@@ -343,7 +343,7 @@
         </section>
     </main>
 
-    <!-- SCRIPTS DO SISTEMA V20.1 -->
+    <!-- SCRIPTS DO SISTEMA V20.2 -->
     <script>
         let currentMediaMode = 'video';
         let seconds = 0;
@@ -543,7 +543,7 @@
             } else {
                 if (vEl) { vEl.classList.add('hidden'); vEl.pause(); }
                 if (aEl) {
-                    aEl.classList.remove('hidden');
+                    aEl.classList.add('hidden');
                     aEl.src = url;
                     aEl.load();
                     aEl.play().catch(e => console.log("Aguardando interação para reproduzir áudio."));
