@@ -33,12 +33,12 @@
                 </div>
                 <div>
                     <h1 class="font-black text-base md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent flex items-center gap-2">
-                        RD CORE DIGITAL <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">v16.0 GLOBAL</span>
+                        RD CORE DIGITAL <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">v17.0 INTERACTIVE</span>
                     </h1>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 shadow-inner hidden sm:inline-block">Global Market</span>
+                <span class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 shadow-inner hidden sm:inline-block">Global Engine</span>
                 <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-lg text-cyan-400 font-bold shadow-inner">
                     00:00:00
                 </div>
@@ -53,7 +53,7 @@
             <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-globe text-emerald-400"></i> Alcance</div>
                 <div class="text-sm font-black text-emerald-400">Global Scale</div>
-                <div class="text-[10px] text-slate-500 mt-1 font-mono">Powered by RD[span_2](start_span)[span_2](end_span)</div>
+                <div class="text-[10px] text-slate-500 mt-1 font-mono">Powered by RD[span_0](start_span)[span_0](end_span)</div>
             </div>
 
             <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
@@ -93,7 +93,7 @@
                 <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Select Global Fleet / Niche</label>
-                        <select id="avatarSelect" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-medium">
+                        <select id="avatarSelect" onchange="previewAvatarSelection()" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-medium cursor-pointer">
                             <option value="Fleet 01 - Tech & AI Automation">Fleet 01 - Tech & AI Automation (Global)</option>
                             <option value="Fleet 02 - High-Conversion Finance">Fleet 02 - High-Conversion Finance & Wealth</option>
                             <option value="Fleet 03 - Elite Sports & Football">Fleet 03 - Elite Sports & Football Analytics</option>
@@ -108,7 +108,7 @@
                         <input type="text" id="adsTitle" value="Global RD Core & Autonomous Expansion" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
                     </div>
                     
-                    <button onclick="launchAvatarixCampaign()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-2">
+                    <button onclick="launchAvatarixCampaign()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                         <i class="fa-solid fa-rocket"></i> Launch Global Autonomous Cycle
                     </button>
                 </div>
@@ -121,7 +121,7 @@
                         <p class="text-[11px] text-slate-400 mb-3">Operating across multi-region edge nodes with strict anti-shadowban protocols and RD Certified branding.</p>
                     </div>
                     <div id="adsOutput" class="bg-cardbg border border-bordercolor p-3 rounded-xl text-xs font-mono text-cyan-300 min-h-[80px] flex items-center justify-center text-center shadow-inner">
-                        Global fleets synchronized and ready for international conversion.
+                        Select a fleet or click launch to initialize real-time simulation.
                     </div>
                 </div>
             </div>
@@ -142,12 +142,12 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Select Agricultural Model</label>
-                    <select id="zoneSelect" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-medium">
+                    <select id="zoneSelect" onchange="loadAgroExample()" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-medium cursor-pointer">
                         <option value="Ribeira Grande">Model A: Fertile Valley Drip System (Reference)</option>
                         <option value="Paul">Model B: Terraced Slope Management</option>
                         <option value="Porto Novo">Model C: Arid Zone Water Conservation</option>
                     </select>
-                    <button onclick="loadAgroExample()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-amber-950/50">
+                    <button onclick="loadAgroExample()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-amber-950/50 cursor-pointer active:scale-95">
                         Load Model Parameters
                     </button>
                 </div>
@@ -177,7 +177,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Sector / Specialty</label>
-                    <select id="engineeringSector" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-medium">
+                    <select id="engineeringSector" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-medium cursor-pointer">
                         <option value="Água Fria (Azul)">🔵 Cold Water Line (Blue Network)</option>
                         <option value="Água Quente (Vermelho)">🔴 Hot Water / Thermal Line (Red Network)</option>
                         <option value="Eletricidade & Tubagens">⚡ Electrical Infrastructure & Conduits</option>
@@ -189,7 +189,7 @@
                     <input type="number" id="flowRate" value="1.5" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
                 </div>
                 <div class="flex items-end bg-slate-950/60 p-4 rounded-xl border border-bordercolor">
-                    <button onclick="calculateMultidisciplinarySystem()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-blue-950/50">
+                    <button onclick="calculateMultidisciplinarySystem()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-blue-950/50 cursor-pointer active:scale-95">
                         Validate Project
                     </button>
                 </div>
@@ -210,10 +210,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 rounded-2xl border border-bordercolor">
-                <button onclick="switchMediaMode('video')" id="tabVideo" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg">
+                <button onclick="switchMediaMode('video')" id="tabVideo" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg cursor-pointer">
                     <i class="fa-solid fa-video"></i> Video
                 </button>
-                <button onclick="switchMediaMode('music')" id="tabMusic" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200">
+                <button onclick="switchMediaMode('music')" id="tabMusic" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer">
                     <i class="fa-solid fa-music"></i> Audio
                 </button>
             </div>
@@ -223,7 +223,7 @@
                     <label id="mediaInputLabel" class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Type Media Name or Select Below</label>
                     <div class="flex gap-2">
                         <input type="text" id="mediaQuery" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Ex: Global Tech Stream or Acoustic Background...">
-                        <button onclick="searchAndPlayMedia()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 rounded-xl font-bold transition flex items-center justify-center shadow-lg shadow-emerald-950/50">
+                        <button onclick="searchAndPlayMedia()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 rounded-xl font-bold transition flex items-center justify-center shadow-lg shadow-emerald-950/50 cursor-pointer active:scale-95">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </div>
@@ -232,10 +232,10 @@
                 <div class="pt-2 border-t border-bordercolor/60">
                     <span class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-wider">Database Presets:</span>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="quickPlay('video', 'https://www.w3schools.com/html/mov_bbb.mp4')" class="text-xs bg-slate-900 hover:bg-slate-800 text-cyan-400 px-3.5 py-2 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium">
+                        <button onclick="quickPlay('video', 'https://www.w3schools.com/html/mov_bbb.mp4')" class="text-xs bg-slate-900 hover:bg-slate-800 text-cyan-400 px-3.5 py-2 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium cursor-pointer">
                             <i class="fa-solid fa-play text-[10px]"></i> Video: Technical Demo
                         </button>
-                        <button onclick="quickPlay('music', 'https://www.w3schools.com/html/horse.ogg')" class="text-xs bg-slate-900 hover:bg-slate-800 text-amber-400 px-3.5 py-2 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium">
+                        <button onclick="quickPlay('music', 'https://www.w3schools.com/html/horse.ogg')" class="text-xs bg-slate-900 hover:bg-slate-800 text-amber-400 px-3.5 py-2 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium cursor-pointer">
                             <i class="fa-solid fa-music text-[10px]"></i> Audio: Background Stream
                         </button>
                     </div>
@@ -253,17 +253,17 @@
         </section>
     </main>
 
-    <!-- SCRIPTS DO SISTEMA GLOBAL ENTERPRISE -->
+    <!-- SCRIPTS DO SISTEMA V17 INTERACTIVE -->
     <script>
         let currentMediaMode = 'video';
 
-        // Relógio de Sessão e Autostart Global com Validação Segura
+        // Relógio de Sessão e Inicialização Instantânea com Feedback
         let seconds = 0;
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
-                if (typeof launchAvatarixCampaign === 'function') launchAvatarixCampaign();
-                if (typeof loadAgroExample === 'function') loadAgroExample();
-            }, 1000);
+                loadAgroExample();
+                previewAvatarSelection();
+            }, 300);
         });
 
         setInterval(() => {
@@ -275,12 +275,20 @@
             if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
         }, 1000);
 
+        function previewAvatarSelection() {
+            const avatar = document.getElementById('avatarSelect')?.value || 'Global Fleet';
+            const out = document.getElementById('adsOutput');
+            if (out) {
+                out.innerHTML = `<span class="text-cyan-400 font-bold">⚡ [FLEET SELECTED]</span><br>Target: ${avatar}<br><span class="text-slate-400 text-[10px]">Ready to deploy autonomous campaign cycle.</span>`;
+            }
+        }
+
         function launchAvatarixCampaign() {
             const avatar = document.getElementById('avatarSelect')?.value || 'Global Fleet';
             const title = document.getElementById('adsTitle')?.value || 'Global Campaign';
             const out = document.getElementById('adsOutput');
             if (out) {
-                out.innerHTML = `<span class="text-cyan-400 font-bold">🚀 [AVATARIX GLOBAL ACTIVE]</span><br>Fleet: ${avatar}<br>Status: Autonomous international cycle "${title}" running under RD Approved!`;
+                out.innerHTML = `<span class="text-emerald-400 font-bold">🚀 [DEPLOYED SUCCESSFULLY]</span><br>Fleet: ${avatar}<br>Campaign "${title}" active across international edge nodes!`;
             }
         }
 
@@ -323,13 +331,13 @@
             const queryInput = document.getElementById('mediaQuery');
 
             if (mode === 'video') {
-                if (btnVideo) btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg";
-                if (btnMusic) btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
+                if (btnVideo) btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg cursor-pointer";
+                if (btnMusic) btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer";
                 if (label) label.textContent = "TYPE VIDEO NAME OR SELECT BELOW";
                 if (queryInput) queryInput.placeholder = "Ex: Global Tech Demo or Smart Pipeline Installation...";
             } else {
-                if (btnMusic) btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg";
-                if (btnVideo) btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200";
+                if (btnMusic) btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg cursor-pointer";
+                if (btnVideo) btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer";
                 if (label) label.textContent = "TYPE AUDIO OR MUSIC NAME";
                 if (queryInput) queryInput.placeholder = "Ex: Ambient Focus Stream or World Music...";
             }
