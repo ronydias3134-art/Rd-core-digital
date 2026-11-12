@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <!-- Alerta de Intervenção Humana (Só aparece se houver algo crítico) -->
+    <!-- Alerta de Intervenção Humana -->
     <div id="human-alert-box" class="hidden mb-8 bg-red-950/40 border border-red-700 rounded-xl p-5">
       <h2 class="text-base font-semibold text-red-300 flex items-center gap-2">
         ⚠️ Atenção Requerida: Exceção Irresolúvel Detetada
@@ -75,9 +75,9 @@
   </div>
 
   <script>
-    // Substituir pelas credenciais reais do projeto Supabase
-    const SUPABASE_URL = 'SUA_URL_SUPABASE';
-    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_SUPABASE';
+    // Credenciais integradas do projeto Avatarix-AI (Supabase)
+    const SUPABASE_URL = 'https://uadnfsmiabucptikpgpo.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VWAffeqRnTqYQYn8bV1p0w_58d62688-6627-4a57-8b06-193ddb297b4f';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function carregarTarefas() {
@@ -90,7 +90,7 @@
         .limit(25);
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">Erro de ligação: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">Erro de ligação ou tabela não criada: ${error.message}</td></tr>`;
         return;
       }
 
