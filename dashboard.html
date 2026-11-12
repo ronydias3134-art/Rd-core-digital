@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core Digital & Avatarix — Monitor de Autonomia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-sans">
+
+  <div class="max-w-5xl mx-auto">
+    <!-- Cabeçalho -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-6 mb-8 gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Core Digital • Monitor de Autonomia</h1>
+        <p class="text-sm text-slate-400 mt-1">Operação 100% autónoma com adaptação estocástica e auto-correção</p>
+      </div>
+      <div class="flex items-center gap-2 bg-emerald-950/60 border border-emerald-700/50 px-3 py-1.5 rounded-full">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-xs font-medium text-emerald-300">Sistema Autónomo Ativo</span>
+      </div>
+    </header>
+
+    <!-- Indicadores Rápidos -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <span class="text-xs uppercase tracking-wider text-slate-400">Concluídas Autonomamente</span>
+        <p id="count-completed" class="text-3xl font-bold text-emerald-400 mt-2">0</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <span class="text-xs uppercase tracking-wider text-slate-400">Em Fila / Adaptação</span>
+        <p id="count-pending" class="text-3xl font-bold text-sky-400 mt-2">0</p>
+      </div>
+      <div class="bg-slate-900 border border-red-900/50 rounded-xl p-5">
+        <span class="text-xs uppercase tracking-wider text-red-400">Requer Dúvida / Ação Humana</span>
+        <p id="count-human" class="text-3xl font-bold text-red-500 mt-2">0</p>
+      </div>
+    </div>
+
+    <!-- Alerta de Intervenção Humana (Só aparece se houver algo crítico) -->
+    <div id="human-alert-box" class="hidden mb-8 bg-red-950/40 border border-red-700 rounded-xl p-5">
+      <h2 class="text-base font-semibold text-red-300 flex items-center gap-2">
+        ⚠️ Atenção Requerida: Exceção Irresolúvel Detetada
+      </h2>
+      <p class="text-sm text-red-200/80 mt-1">O sistema esgotou as tentativas autónomas numa ou mais tarefas e aguarda a tua decisão.</p>
+    </div>
+
+    <!-- Tabela de Operações em Tempo Real -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+        <h2 class="font-semibold text-slate-200">Registo de Execução em Tempo Real</h2>
+        <button onclick="carregarTarefas()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition">
+          Atualizar Agora
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-950/60 text-slate-400 text-xs uppercase">
+            <tr>
+              <th class="px-6 py-3">ID / Tarefa</th>
+              <th class="px-6 py-3">Estado</th>
+              <th class="px-6 py-3">Log / Adaptação</th>
+              <th class="px-6 py-3">Data</th>
+            </tr>
+          </thead>
+          <tbody id="tasks-table-body" class="divide-y divide-slate-800">
+            <tr>
+              <td colspan="4" class="px-6 py-8 text-center text-slate-500">A sincronizar com o ecossistema...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Substituir pelas credenciais reais do projeto Supabase
+    const SUPABASE_URL = 'SUA_URL_SUPABASE';
+    const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_SUPABASE';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function carregarTarefas() {
+      const tbody = document.getElementById('tasks-table-body');
+      
+      const { data, error } = await supabaseClient
+        .from('queue')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-red-400">Erro de ligação: ${error.message}</td></tr>`;
+        return;
+      }
+
+      let completed = 0, pending = 0, human = 0;
+      tbody.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">Nenhuma tarefa registada na fila ainda. Sistema em standby autónomo.</td></tr>`;
+      } else {
+        data.forEach(task => {
+          if (task.status === 'completed') completed++;
+          else if (task.status === 'needs_human_review') human++;
+          else pending++;
+
+          let badge = '';
+          if (task.status === 'completed') {
+            badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-800">Autónomo OK</span>';
+          } else if (task.status === 'needs_human_review') {
+            badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-950 text-red-400 border border-red-800">Dúvida / Ação Humana</span>';
+          } else {
+            badge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-950 text-sky-400 border border-sky-800">Em Processamento</span>';
+          }
+
+          const dataFormatada = task.created_at ? new Date(task.created_at).toLocaleString('pt-PT') : '-';
+
+          tbody.innerHTML += `
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4 font-mono text-xs text-slate-300">${task.id}</td>
+              <td class="px-6 py-4">${badge}</td>
+              <td class="px-6 py-4 text-xs text-slate-400 max-w-xs truncate">${task.error_log || 'Execução normal sem anomalias'}</td>
+              <td class="px-6 py-4 text-xs text-slate-500">${dataFormatada}</td>
+            </tr>
+          `;
+        });
+      }
+
+      document.getElementById('count-completed').innerText = completed;
+      document.getElementById('count-pending').innerText = pending;
+      document.getElementById('count-human').innerText = human;
+
+      const alertBox = document.getElementById('human-alert-box');
+      if (human > 0) alertBox.classList.remove('hidden');
+      else alertBox.classList.add('hidden');
+    }
+
+    // Escuta alterações na base de dados em tempo real (Realtime)
+    supabaseClient
+      .channel('monitor-autonomia')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'queue' }, () => {
+        carregarTarefas();
+      })
+      .subscribe();
+
+    carregarTarefas();
+  </script>
+</body>
+</html>
