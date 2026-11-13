@@ -17,6 +17,10 @@
         ul { list-style: none; padding: 0; }
         li { background: #475569; padding: 10px; margin-top: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
         .status-pending { color: #facc15; font-weight: bold; }
+        .grid-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
+        .link-btn { display: block; text-align: center; padding: 8px 10px; background: #0f172a; color: #38bdf8; text-decoration: none; border-radius: 4px; border: 1px solid #475569; font-size: 14px; font-weight: bold; }
+        .link-btn:hover { background: #475569; color: #fff; }
+        .section-title { font-size: 16px; color: #38bdf8; margin-bottom: 8px; margin-top: 0; }
     </style>
 </head>
 <body>
@@ -24,6 +28,30 @@
         <h1>Rd-core-digital Dashboard</h1>
         <p>Ligado ao Supabase: <strong>Avatarix-AI</strong></p>
         
+        <!-- Redes Sociais e Acessos Rápidos (Baixo Consumo) -->
+        <div class="card">
+            <p class="section-title">🌐 Redes Sociais</p>
+            <div class="grid-buttons">
+                <a href="https://wa.me/" target="_blank" class="link-btn">WhatsApp</a>
+                <a href="https://facebook.com" target="_blank" class="link-btn">Facebook</a>
+                <a href="https://instagram.com" target="_blank" class="link-btn">Instagram</a>
+                <a href="https://youtube.com" target="_blank" class="link-btn">YouTube</a>
+                <a href="https://github.com" target="_blank" class="link-btn">GitHub</a>
+                <a href="https://telegram.org" target="_blank" class="link-btn">Telegram</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <p class="section-title">🤖 Acesso a IAs Gratuitas</p>
+            <div class="grid-buttons">
+                <a href="https://chatgpt.com" target="_blank" class="link-btn">ChatGPT</a>
+                <a href="https://claude.ai" target="_blank" class="link-btn">Claude</a>
+                <a href="https://gemini.google.com" target="_blank" class="link-btn">Gemini</a>
+                <a href="https://www.perplexity.ai" target="_blank" class="link-btn">Perplexity</a>
+                <a href="https://huggingface.co" target="_blank" class="link-btn">Hugging Face</a>
+            </div>
+        </div>
+
         <div class="card">
             <h3>Adicionar Nova Tarefa à Fila (Queue)</h3>
             <input type="text" id="taskName" placeholder="Nome da tarefa (ex: Gerar Vídeo)">
