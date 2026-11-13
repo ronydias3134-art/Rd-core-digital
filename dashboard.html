@@ -123,10 +123,18 @@
             </div>
         </div>
 
+        <!-- Assistente por Voz Nativo -->
+        <div class="card">
+            <p class="section-title">🎤 Assistente por Voz</p>
+            <p class="desc-text">Clica no botão para ditares comandos ou tarefas por voz diretamente no painel.</p>
+            <button onclick="startVoiceRecognition()" style="background: #10b981;">🎙️ Falar Agora</button>
+            <p id="voiceStatus" style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Estado: Pronto para ouvir</p>
+        </div>
+
         <!-- Supabase Queue Management -->
         <div class="card">
             <p class="section-title">⚡ Gestão de Fila (Supabase Queue)</p>
-            <input type="text" id="taskName" placeholder="Nome da tarefa ou comando (ex: Gerar Vídeo)">
+            <input type="text" id="taskName" placeholder="Nome da tarefa ou ditado por voz">
             <button onclick="addTaskCustom()">Adicionar à Fila</button>
             
             <div style="margin-top: 15px;">
@@ -198,6 +206,41 @@
 
             addTask(taskName);
             input.value = '';
+        }
+
+        function startVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('O teu navegador não suporta reconhecimento de voz direto.');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'pt-PT';
+            const statusEl = document.getElementById('voiceStatus');
+            const inputEl = document.getElementById('taskName');
+
+            recognition.onstart = () => {
+                statusEl.innerText = '🔴 A ouvir... Fala agora!';
+            };
+
+            recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript;
+                statusEl.innerText = 'Reconhecido: "' + speechResult + '"';
+                if (inputEl) {
+                    inputEl.value = speechResult;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                statusEl.innerText = 'Erro: ' + event.error;
+            };
+
+            recognition.onend = () => {
+                statusEl.innerText = 'Estado: Pronto para ouvir';
+            };
+
+            recognition.start();
         }
 
         // Carregar tarefas ao abrir a página e atualizar automaticamente a cada 5 segundos
