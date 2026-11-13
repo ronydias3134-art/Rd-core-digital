@@ -7,33 +7,56 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; }
-        .status-dot { height: 10px; width: 10px; background-color: #22c55e; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .title { font-size: 16px; font-weight: bold; color: #38bdf8; display: flex; align-items: center; }
-        .badge-version { background: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #38bdf8; border: 1px solid #334155; }
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #111827;
+            --border-color: #1f2937;
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --text-main: #e2e8f0;
+            --text-muted: #9ca3af;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 10px; font-size: 13px; }
+        .container { max-width: 750px; margin: 0 auto; }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .card { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; box-sizing: border-box; }
-        .card-title { font-size: 14px; color: #94a3b8; margin-bottom: 5px; font-weight: bold; }
-        .card-value { font-size: 18px; font-weight: bold; color: #f8fafc; }
+        /* Header Command Center */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 10px 14px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .status-dot { height: 8px; width: 8px; background-color: var(--accent-green); border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px var(--accent-green); }
+        .title { font-size: 14px; font-weight: 800; color: var(--accent-blue); display: flex; align-items: center; letter-spacing: 0.5px; }
+        .badge-version { background: var(--bg-main); padding: 4px 8px; border-radius: 4px; font-size: 11px; color: var(--accent-blue); border: 1px solid var(--border-color); font-weight: bold; }
         
-        .section-title { font-size: 15px; color: #38bdf8; margin-bottom: 10px; font-weight: bold; }
+        /* Grid Metrics */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .card { background: var(--bg-card); padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border-color); box-sizing: border-box; }
+        .card-title { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-value { font-size: 14px; font-weight: bold; color: #f9fafb; }
         
-        input, select, button { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; font-size: 14px; }
-        button { background: #0284c7; border: none; font-weight: bold; cursor: pointer; }
+        .section-title { font-size: 13px; color: var(--accent-blue); margin-bottom: 8px; font-weight: bold; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Inputs & Buttons */
+        input, select, button { width: 100%; padding: 8px 10px; margin-top: 4px; margin-bottom: 6px; border-radius: 6px; border: 1px solid #374151; background: var(--bg-main); color: #fff; box-sizing: border-box; font-size: 12px; }
+        select { cursor: pointer; }
+        button { background: #0284c7; border: none; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
         button:hover { background: #0369a1; }
+        button.secondary { background: #374151; color: var(--text-main); }
+        button.secondary:hover { background: #4b5563; }
+        button.success { background: #059669; }
+        button.success:hover { background: #047857; }
+        button.ai-btn { background: #7c3aed; }
+        button.ai-btn:hover { background: #6d28d9; }
         
+        /* Lists & Links Grid */
         ul { list-style: none; padding: 0; margin: 0; }
-        li { background: #334155; padding: 10px; margin-top: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .status-pending { color: #facc15; font-weight: bold; }
+        li { background: #1f2937; padding: 8px 10px; margin-top: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; border: 1px solid #374151; }
+        .status-pending { color: #fbbf24; font-weight: bold; font-size: 11px; background: rgba(251, 191, 36, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.2); }
         
-        .grid-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
-        .link-btn { display: block; text-align: center; padding: 8px 6px; background: #0f172a; color: #38bdf8; text-decoration: none; border-radius: 4px; border: 1px solid #475569; font-size: 13px; font-weight: bold; }
-        .link-btn:hover { background: #334155; color: #fff; }
+        .grid-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 6px; margin-top: 6px; }
+        .link-btn { display: block; text-align: center; padding: 7px 4px; background: var(--bg-main); color: var(--accent-blue); text-decoration: none; border-radius: 6px; border: 1px solid #374151; font-size: 11px; font-weight: bold; transition: all 0.2s; }
+        .link-btn:hover { background: #1f2937; color: #fff; border-color: var(--accent-blue); }
         
-        .desc-text { font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4; }
+        .desc-text { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
+        .sub-box { background: var(--bg-main); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 6px; }
     </style>
 </head>
 <body>
@@ -47,34 +70,29 @@
         <!-- Metrics Grid -->
         <div class="grid-2">
             <div class="card" style="margin-bottom:0;">
-                <div class="card-title">CHANCELA OFICIAL</div>
-                <div class="card-value" style="color: #22c55e; font-size: 16px;">RD Approved</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top:2px;">Powered by RD</div>
+                <div class="card-title">Chancela Oficial</div>
+                <div class="card-value" style="color: var(--accent-green); font-size: 13px;">RD Approved</div>
             </div>
             <div class="card" style="margin-bottom:0;">
-                <div class="card-title">TESOURARIA</div>
-                <div class="card-value" style="color: #38bdf8;">5.0%</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top:2px;">Strict Margin</div>
+                <div class="card-title">Tesouraria</div>
+                <div class="card-value" style="color: var(--accent-blue);">5.0% <span style="font-size:10px; color:var(--text-muted);">Margin</span></div>
             </div>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-2" style="margin-top: 8px;">
             <div class="card" style="margin-bottom:0;">
-                <div class="card-title">MARKETPLACE</div>
-                <div class="card-value" style="color: #facc15; font-size: 16px;">Ativo</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top:2px;">Conversão Direta</div>
+                <div class="card-title">Marketplace</div>
+                <div class="card-value" style="color: #fbbf24; font-size: 13px;">Ativo</div>
             </div>
             <div class="card" style="margin-bottom:0;">
-                <div class="card-title">BRAND SAFETY</div>
-                <div class="card-value" style="font-size: 15px;">International</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top:2px;">Compliance Gate</div>
+                <div class="card-title">Brand Safety</div>
+                <div class="card-value" style="font-size: 12px;">International Gate</div>
             </div>
         </div>
 
-        <!-- Redes Sociais & Canais Oficiais (Baixo Consumo) -->
-        <div class="card">
-            <p class="section-title">🌐 Redes Sociais & Canais (RD Ecosystem)</p>
-            <p class="desc-text">Conecte-se aos fluxos de tráfego global e atualizações em tempo real.</p>
+        <!-- O Íman: Redes Sociais & Canais -->
+        <div class="card" style="margin-top: 8px;">
+            <div class="section-title">🌐 Redes Sociais & Canais</div>
             <div class="grid-buttons">
                 <a href="https://wa.me/" target="_blank" class="link-btn">WhatsApp</a>
                 <a href="https://facebook.com" target="_blank" class="link-btn">Facebook</a>
@@ -85,10 +103,9 @@
             </div>
         </div>
 
-        <!-- Acesso a IAs Gratuitas -->
+        <!-- O Íman: Acesso a IAs Gratuitas -->
         <div class="card">
-            <p class="section-title">🤖 Acesso a IAs Gratuitas</p>
-            <p class="desc-text">Ferramentas de suporte e desenvolvimento sem custos de infraestrutura.</p>
+            <div class="section-title">🤖 Acesso a IAs Gratuitas</div>
             <div class="grid-buttons">
                 <a href="https://chatgpt.com" target="_blank" class="link-btn">ChatGPT</a>
                 <a href="https://claude.ai" target="_blank" class="link-btn">Claude</a>
@@ -98,23 +115,21 @@
             </div>
         </div>
 
-        <!-- Engenharia & Projetos -->
+        <!-- Hub de Construção Civil & IA On-Demand -->
         <div class="card">
-            <p class="section-title">📐 RD Global Marketplace: Serviços & Soluções</p>
-            <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155;">
-                <div style="font-size: 12px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">Engenharia</div>
-                <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px;">Projeto Hidráulico Especializado</div>
-                <div class="desc-text">Memória descritiva, dimensionamento de caudais e conformidade regulamentar internacional com assinatura técnica.</div>
-                <button onclick="addTask('Solicitar Projeto Hidráulico')">Solicitar Projeto</button>
+            <div class="section-title">🏗️ Hub de Construção Civil & IA On-Demand</div>
+            <div class="sub-box">
+                <div class="desc-text">Acesso universal para qualquer especialidade de construção civil. Se faltar algum cálculo, material ou projeto, acione a IA em tempo real.</div>
+                <input type="text" id="customBuildNeed" placeholder="O que precisa na obra? (ex: Orçamento alvenaria, cálculo viga...)">
+                <button class="ai-btn" onclick="triggerAIGenerator()">⚡ Acionar JA Grátis (Traxer / Gerar em Falta)</button>
             </div>
         </div>
 
         <!-- Agrotech Global Suite -->
         <div class="card">
-            <p class="section-title">🌱 Agrotech Global Suite: International Farming Models</p>
-            <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155;">
-                <div style="font-size: 12px; color: #facc15; font-weight: bold; margin-bottom: 4px;">Fertirrigação & Solos</div>
-                <label style="font-size: 13px; color: #94a3b8; display: block; margin-top: 8px;">SELECT AGRICULTURAL MODEL</label>
+            <div class="section-title">🌱 Agrotech Global Suite</div>
+            <div class="sub-box">
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px; font-weight: bold;">SELECIONAR MODELO AGRÍCOLA</label>
                 <select id="agriModel">
                     <option>Model A: Fertile Valley Drip System</option>
                     <option>Model B: Arid Zone Subsurface Drip</option>
@@ -125,23 +140,23 @@
 
         <!-- Assistente por Voz Nativo -->
         <div class="card">
-            <p class="section-title">🎤 Assistente por Voz</p>
-            <p class="desc-text">Clica no botão para ditares comandos ou tarefas por voz diretamente no painel.</p>
-            <button onclick="startVoiceRecognition()" style="background: #10b981;">🎙️ Falar Agora</button>
-            <p id="voiceStatus" style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Estado: Pronto para ouvir</p>
+            <div class="section-title">🎤 Assistente por Voz</div>
+            <div class="desc-text">Ditado automático integrado para preenchimento rápido de tarefas e necessidades da obra.</div>
+            <button class="success" onclick="startVoiceRecognition()">🎙️ Iniciar Reconhecimento de Voz</button>
+            <div id="voiceStatus" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic;">Estado: Pronto para ouvir</div>
         </div>
 
         <!-- Supabase Queue Management -->
         <div class="card">
-            <p class="section-title">⚡ Gestão de Fila (Supabase Queue)</p>
-            <input type="text" id="taskName" placeholder="Nome da tarefa ou ditado por voz">
-            <button onclick="addTaskCustom()">Adicionar à Fila</button>
+            <div class="section-title">⚡ Gestão de Fila (Queue)</div>
+            <input type="text" id="taskName" placeholder="Nova tarefa ou comando gerado...">
+            <div style="display: flex; gap: 6px;">
+                <button onclick="addTaskCustom()" style="margin:0;">Adicionar à Fila</button>
+                <button class="secondary" onclick="loadTasks()" style="margin:0; width: auto; padding: 8px 12px;">Atualizar</button>
+            </div>
             
-            <div style="margin-top: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 13px; font-weight: bold; color: #94a3b8;">TAREFAS ATIVAS</span>
-                    <button onclick="loadTasks()" style="width: auto; padding: 6px 12px; margin: 0; font-size: 12px;">Atualizar</button>
-                </div>
+            <div style="margin-top: 10px;">
+                <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Tarefas Ativas (Auto-refresh 5s)</div>
                 <ul id="taskList">
                     <li>A carregar tarefas...</li>
                 </ul>
@@ -165,7 +180,7 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                listEl.innerHTML = `<li style="color: #ef4444;">Erro ao carregar: ${error.message}</li>`;
+                listEl.innerHTML = `<li style="color: #f87171;">Erro ao carregar: ${error.message}</li>`;
                 return;
             }
 
@@ -178,7 +193,7 @@
             data.forEach(task => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span><strong>${task.task_name}</strong></span> <span class="status-pending">${task.status}</span>`;
-                listEl.appendChild(li);
+                li.appendChild(li);
             });
         }
 
@@ -192,7 +207,6 @@
                 return;
             }
             loadTasks();
-            alert('Tarefa adicionada com sucesso à fila!');
         }
 
         function addTaskCustom() {
@@ -208,10 +222,25 @@
             input.value = '';
         }
 
+        async function triggerAIGenerator() {
+            const input = document.getElementById('customBuildNeed');
+            const need = input.value.trim();
+
+            if (!need) {
+                alert('Escreve o que precisas para a obra para acionar a JA Grátis!');
+                return;
+            }
+
+            const aiTaskName = 'JA Grátis (Solicitação Obra): ' + need;
+            await addTask(aiTaskName);
+            input.value = '';
+            alert('Solicitação enviada! A JA Grátis foi acionada para processar e trazer o que falta.');
+        }
+
         function startVoiceRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert('O teu navegador não suporta reconhecimento de voz direto.');
+                alert('O teu navegador não suporta reconhecimento de voz.');
                 return;
             }
 
@@ -233,7 +262,7 @@
             };
 
             recognition.onerror = (event) => {
-                statusEl.innerText = 'Erro: ' + event.error;
+                statusEl.innerText = 'Erro de voz: ' + event.error;
             };
 
             recognition.onend = () => {
@@ -243,7 +272,7 @@
             recognition.start();
         }
 
-        // Carregar tarefas ao abrir a página e atualizar automaticamente a cada 5 segundos
+        // Carregar tarefas ao abrir e sincronizar automaticamente a cada 5 segundos
         loadTasks();
         setInterval(loadTasks, 5000);
     </script>
