@@ -48,8 +48,7 @@
 
         async function loadTasks() {
             const listEl = document.getElementById('taskList');
-            listEl.innerHTML = '<li>A carregar...</li>';
-
+            
             const { data, error } = await supabaseClient
                 .from('queue')
                 .select('*')
@@ -95,10 +94,9 @@
             loadTasks();
         }
 
-        // Carregar tarefas ao abrir a página
+        // Carregar tarefas ao abrir a página e atualizar automaticamente a cada 5 segundos
         loadTasks();
+        setInterval(loadTasks, 5000);
     </script>
 </body>
 </html>
-// Atualizar a lista automaticamente a cada 5 segundos
-setInterval(loadTasks, 5000);
