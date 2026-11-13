@@ -1,2 +1,123 @@
-const SUPABASE_URL = 'https://uadnfsmlabucptikpgpo.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_VWA5sqc8cTqYQYopTxFe2A_exXLszA5';
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RD Core Digital - Centro de Comando</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-blue-400">RD Core Digital</h1>
+            <div id="connection-status" class="text-xs px-2 py-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">A ligar...</div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6">
+        <!-- Métricas e Estado -->
+        <section class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-xs text-slate-400">Influenciadores Ativos</p>
+                <p id="metric-influencers" class="text-2xl font-bold text-white mt-1">--</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-xs text-slate-400">Comandos na Fila</p>
+                <p id="metric-agents" class="text-2xl font-bold text-white mt-1">--</p>
+            </div>
+        </section>
+
+        <!-- Painel de Envio de Comandos -->
+        <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
+            <h2 class="text-lg font-semibold text-slate-200">Enviar Comando para Agente</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ID do Agente / Alvo</label>
+                    <input type="text" id="agent-id" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="ex: agent_alpha_01">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Comando / Payload</label>
+                    <textarea id="command-payload" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="STATUS_CHECK ou JSON de tarefa"></textarea>
+                </div>
+                <button onclick="sendCommand()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-colors text-sm">
+                    Enviar Comando
+                </button>
+                <p id="status-message" class="text-xs text-center text-slate-400 h-4"></p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://uadnfsmlabucptikpgpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_VWA5sqc8cTqYQYopTxFe2A_exXLszA5';
+
+        let supabaseClient = null;
+
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            document.getElementById('connection-status').textContent = 'Online';
+            document.getElementById('connection-status').className = 'text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            loadDashboardData();
+        } catch (err) {
+            document.getElementById('connection-status').textContent = 'Erro de Ligação';
+            document.getElementById('connection-status').className = 'text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30';
+        }
+
+        async function loadDashboardData() {
+            if (!supabaseClient) return;
+            try {
+                const { count, error } = await supabaseClient.from('commands').select('*', { count: 'exact', head: true });
+                if (!error && count !== null) {
+                    document.getElementById('metric-agents').textContent = count;
+                } else {
+                    document.getElementById('metric-agents').textContent = '0';
+                }
+                document.getElementById('metric-influencers').textContent = '1';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function sendCommand() {
+            const agentId = document.getElementById('agent-id').value.trim();
+            const payload = document.getElementById('command-payload').value.trim();
+            const msgEl = document.getElementById('status-message');
+
+            if (!agentId || !payload) {
+                msgEl.textContent = 'Preenche todos os campos antes de enviar.';
+                msgEl.className = 'text-xs text-center text-red-400 h-4';
+                return;
+            }
+
+            if (!supabaseClient) {
+                msgEl.textContent = 'Cliente Supabase não inicializado.';
+                msgEl.className = 'text-xs text-center text-red-400 h-4';
+                return;
+            }
+
+            msgEl.textContent = 'A enviar...';
+            msgEl.className = 'text-xs text-center text-amber-400 h-4';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('commands')
+                    .insert([{ agent_id: agentId, payload: payload, status: 'pending' }]);
+
+                if (error) throw error;
+
+                msgEl.textContent = 'Comando enviado com sucesso!';
+                msgEl.className = 'text-xs text-center text-emerald-400 h-4';
+                document.getElementById('command-payload').value = '';
+                loadDashboardData();
+            } catch (err) {
+                msgEl.textContent = 'Erro ao enviar: ' + (err.message || 'Tenta novamente');
+                msgEl.className = 'text-xs text-center text-red-400 h-4';
+            }
+        }
+    </script>
+</body>
+</html>
