@@ -1,555 +1,404 @@
 <!DOCTYPE html>
-<html lang="pt" class="dark">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RD Core Digital — Global Enterprise Platform (Powered by RD)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darker: '#030712',
-                        cardbg: '#0b0f19',
-                        bordercolor: '#1e293b'
-                    }
-                }
-            }
+    <title>RD Core Digital - Command Center</title>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #111827;
+            --border-color: #1f2937;
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --accent-purple: #a855f7;
+            --accent-orange: #f97316;
+            --accent-gold: #fbbf24;
+            --text-main: #e2e8f0;
+            --text-muted: #9ca3af;
         }
-    </script>
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 10px; font-size: 13px; }
+        .container { max-width: 750px; margin: 0 auto; }
+        
+        .header-bar { background: var(--bg-card); padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .status-dot { height: 8px; width: 8px; background-color: var(--accent-green); border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px var(--accent-green); }
+        .title { font-size: 15px; font-weight: 800; color: var(--accent-blue); letter-spacing: 1px; text-transform: uppercase; display: inline-flex; align-items: center; }
+        .version-badge { font-size: 10px; background: rgba(56, 189, 248, 0.1); color: var(--accent-blue); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2); font-weight: bold; }
+        .timer-badge { font-size: 11px; background: rgba(52, 211, 153, 0.1); color: var(--accent-green); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(52, 211, 153, 0.2); font-family: monospace; font-weight: bold; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .card { background: var(--bg-card); padding: 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border-color); box-sizing: border-box; }
+        .card-title { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-title { font-size: 13px; color: var(--accent-blue); margin-bottom: 8px; font-weight: bold; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .badge-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .badge-agri { background: rgba(249, 115, 22, 0.1); color: var(--accent-orange); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .badge-tech { background: rgba(168, 85, 247, 0.1); color: var(--accent-purple); border: 1px solid rgba(168, 85, 247, 0.3); }
+        .badge-eng { background: rgba(56, 189, 248, 0.1); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+
+        input, select, textarea { width: 100%; padding: 8px 10px; margin-top: 4px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #374151; background: var(--bg-main); color: #fff; box-sizing: border-box; font-size: 12px; }
+        select { cursor: pointer; }
+        button { width: 100%; padding: 9px 12px; margin-top: 4px; margin-bottom: 6px; border-radius: 6px; border: none; background: #0284c7; color: #fff; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-size: 12px; }
+        button:hover { background: #0369a1; }
+        button.secondary { background: #374151; color: var(--text-main); }
+        button.secondary:hover { background: #4b5563; }
+        button.success { background: #059669; }
+        button.success:hover { background: #047857; }
+        button.ai-btn { background: #7c3aed; }
+        button.ai-btn:hover { background: #6d28d9; }
+        button.orange-btn { background: #ea580c; }
+        button.orange-btn:hover { background: #c2410c; }
+        
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { background: #1f2937; padding: 8px 10px; margin-top: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; border: 1px solid #374151; }
+        .status-pending { color: var(--accent-gold); font-weight: bold; font-size: 11px; background: rgba(251, 191, 36, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(251, 191, 36, 0.2); }
+        
+        .grid-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); gap: 6px; margin-top: 6px; }
+        .link-btn { display: block; text-align: center; padding: 8px 4px; background: var(--bg-main); color: var(--accent-blue); text-decoration: none; border-radius: 6px; border: 1px solid #374151; font-size: 11px; font-weight: bold; transition: all 0.2s; }
+        .link-btn:hover { background: #1f2937; color: #fff; border-color: var(--accent-blue); }
+        .link-btn.ai { color: var(--accent-purple); border-color: rgba(168, 85, 247, 0.3); }
+        .link-btn.game { color: var(--accent-orange); border-color: rgba(249, 115, 22, 0.3); }
+        
+        .desc-text { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
+        .sub-box { background: var(--bg-main); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 6px; }
+        .telemetry-box { background: #07090e; padding: 10px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 11px; color: #38bdf8; margin-top: 6px; }
+    </style>
 </head>
-<body class="bg-darker text-slate-100 min-h-screen font-sans antialiased pb-16 selection:bg-cyan-500 selection:text-white">
-
-    <!-- CABEÇALHO TÁTICO INTERNACIONAL (RD ECOSYSTEM) -->
-    <header class="border-b border-bordercolor bg-cardbg/90 backdrop-blur-md sticky top-0 z-50 shadow-2xl">
-        <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="relative flex items-center justify-center">
-                    <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping absolute"></div>
-                    <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 relative"></div>
-                </div>
-                <div>
-                    <h1 class="font-black text-base md:text-xl tracking-wider bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent flex items-center gap-2">
-                        RD CORE DIGITAL <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2 py-0.5 rounded-full">v20.2 GLOBAL</span>
-                    </h1>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-xs font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 shadow-inner hidden sm:inline-block">Global Engine</span>
-                <div id="sessionTimer" class="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-1 rounded-lg text-cyan-400 font-bold shadow-inner">
-                    00:00:00
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-5xl mx-auto px-4 mt-6 space-y-6">
-
-        <!-- PAINEL DE TELEMETRIA E GOVERNANÇA INTERNACIONAL -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-stamp text-emerald-400"></i> Chancela Oficial</div>
-                <div class="text-sm font-black text-emerald-400">RD Approved</div>
-                <div class="text-[10px] text-slate-500 mt-1 font-mono">Powered by RD</div>
-            </div>
-
-            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-wallet text-cyan-400"></i> Tesouraria</div>
-                <div class="text-2xl font-black text-cyan-400">5.0%</div>
-                <div class="text-[10px] text-slate-500 mt-1 font-mono">Strict Margin</div>
-            </div>
-
-            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-store text-amber-400"></i> Marketplace</div>
-                <div class="text-2xl font-black text-amber-400">Ativo</div>
-                <div class="text-[10px] text-slate-500 mt-1 font-mono">Conversão Direta</div>
-            </div>
-
-            <div class="bg-cardbg border border-bordercolor p-4 rounded-2xl shadow-xl hover:border-cyan-500/50 transition duration-300">
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-indigo-400"></i> Brand Safety</div>
-                <div class="text-xs font-bold text-indigo-400 mt-1">International</div>
-                <div class="text-[10px] text-slate-500 mt-1 font-mono">Compliance Gate</div>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <div class="title"><span class="status-dot"></span> RD CORE DIGITAL</div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <span class="version-badge">v20.2 GLOBAL</span>
+                <span class="timer-badge" id="uptimeTimer">00:00:00</span>
             </div>
         </div>
 
-        <!-- MÓDULO: ÍMAN DE REDES SOCIAIS (SOCIAL MEDIA MAGNET) -->
-        <section class="bg-cardbg border border-bordercolor rounded-2xl p-4 md:p-5 shadow-xl">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center text-white shadow-lg">
-                        <i class="fa-solid fa-share-nodes text-base"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-extrabold text-slate-100">Redes & Canais Oficiais (RD Ecosystem)</h2>
-                        <p class="text-[11px] text-slate-400">Conecte-se aos nossos fluxos de tráfego global e atualizações em tempo real.</p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <a href="https://github.com/ronnydias3134-art" target="_blank" class="bg-slate-900 hover:bg-slate-800 border border-bordercolor text-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                        <i class="fa-brands fa-github text-cyan-400"></i> GitHub
-                    </a>
-                    <a href="https://vercel.com" target="_blank" class="bg-slate-900 hover:bg-slate-800 border border-bordercolor text-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                        <i class="fa-solid fa-triangle-exclamation text-emerald-400"></i> Vercel Edge
-                    </a>
-                    <a href="mailto:Ronnydias3134@gmail.com" class="bg-slate-900 hover:bg-slate-800 border border-bordercolor text-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                        <i class="fa-solid fa-envelope text-amber-400"></i> Contacto Direto
-                    </a>
+        <div class="grid-2">
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title">Chancela Oficial</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--accent-green); margin-top: 2px;">RD Approved</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Validado por RD</div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title">Tesouraria (5.0%)</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--accent-blue); margin-top: 2px;">5.0%</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Margem Estrita</div>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 8px;">
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title">Mercado Digital</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--accent-orange); margin-top: 2px;">Ativo</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Conversão Direta</div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+                <div class="card-title">Segurança de Marca</div>
+                <div style="font-size: 12px; font-weight: bold; color: var(--accent-purple); margin-top: 2px;">Conformidade</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Portão Global</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 8px;">
+            <div class="section-title">🌐 Redes Sociais Oficiais (Ecossistema RD)</div>
+            <div class="desc-text">Conexão direta aos canais de tráfego e atualizações em tempo real.</div>
+            <div class="grid-buttons">
+                <a href="https://facebook.com" target="_blank" class="link-btn">Facebook</a>
+                <a href="https://youtube.com" target="_blank" class="link-btn">YouTube</a>
+                <a href="https://twitter.com" target="_blank" class="link-btn">X (Twitter)</a>
+                <a href="https://instagram.com" target="_blank" class="link-btn">Instagram</a>
+                <a href="https://wa.me/" target="_blank" class="link-btn">WhatsApp</a>
+                <a href="https://telegram.org" target="_blank" class="link-btn">Telegram</a>
+                <a href="https://github.com" target="_blank" class="link-btn">GitHub</a>
+                <a href="https://vercel.com" target="_blank" class="link-btn">Vercel Edge</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">🤖 Inteligências Artificiais de Apoio</div>
+            <div class="grid-buttons">
+                <a href="https://chatgpt.com" target="_blank" class="link-btn ai">ChatGPT</a>
+                <a href="https://claude.ai" target="_blank" class="link-btn ai">Claude</a>
+                <a href="https://gemini.google.com" target="_blank" class="link-btn ai">Gemini</a>
+                <a href="https://www.perplexity.ai" target="_blank" class="link-btn ai">Perplexity</a>
+                <a href="https://huggingface.co" target="_blank" class="link-btn ai">Hugging Face</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">🎮 Zona de Lazer & Jogos RD</div>
+            <div class="grid-buttons">
+                <a href="https://poki.com" target="_blank" class="link-btn game">Arcade</a>
+                <a href="https://www.chess.com" target="_blank" class="link-btn game">Xadrez</a>
+                <a href="https://kizi.com" target="_blank" class="link-btn game">Mini Jogos</a>
+            </div>
+            <button class="orange-btn" onclick="handleSmartAction('Registar Sessão de Jogo')" style="margin-top: 8px;">🕹️ Registar na Fila de Atividade</button>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">📊 GPI: Gestão de Projetos & Instalações</div>
+                <span class="badge-tag badge-eng">Ativo</span>
+            </div>
+            <div class="desc-text" style="margin-top: 6px;">Controlo integrado de cronogramas, inspeções técnicas e conformidade de obras.</div>
+            <div class="sub-box">
+                <input type="text" id="gpiProject" placeholder="Nome da Obra / Instalação...">
+                <button onclick="handleSmartAction('Registar Projeto GPI: ' + document.getElementById('gpiProject').value)">Registar na GPI</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">🏗️ Hub de Construção Civil & Engenharia</div>
+                <span class="badge-tag badge-eng">Técnico</span>
+            </div>
+            <div class="sub-box">
+                <input type="text" id="customBuildNeed" placeholder="O que necessita na obra? (ex: Orçamento de alvenaria...)">
+                <button class="ai-btn" onclick="triggerSmartAI()">⚡ Acionar Assistente de Obra</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">🌱 Suíte Agrotech: Rega & Solos</div>
+                <span class="badge-tag badge-agri">Agronomia</span>
+            </div>
+            <div style="font-weight: bold; font-size: 13px; margin-top: 6px; margin-bottom: 4px;">Consultoria de Rega & Fertirrigação</div>
+            <div class="desc-text">Planeamento agronómico otimizado para eficiência hídrica e alta rentabilidade em campos de cultivo.</div>
+            <button class="orange-btn" onclick="handleSmartAction('Solicitar Consultoria Agrotech')">Solicitar Consultoria Agrícola</button>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">🤖 Ecossistema de Automação & Campanhas</div>
+                <span class="badge-tag badge-tech">Autónomo</span>
+            </div>
+            <div class="desc-text" style="margin-top: 6px;">Gestão de estruturas digitais autónomas e conversão de tráfego multicanal.</div>
+            <button class="ai-btn" onclick="handleSmartAction('Ativar Ecossistema de Automação')">Ativar Estrutura Autónoma</button>
+        </div>
+
+        <div class="card">
+            <div class="section-title">🚀 Motor de Campanhas: Nichos & Autostart</div>
+            <div class="sub-box">
+                <label class="card-title">SELECIONAR FROTA / NICHO</label>
+                <select id="avatarFleet">
+                    <option>Frota 01 - Automação & Tech (Global)</option>
+                    <option>Frota 02 - Agrotech & Sistemas de Rega</option>
+                    <option>Frota 03 - Soluções de Engenharia Hidráulica</option>
+                </select>
+
+                <label class="card-title" style="margin-top: 8px;">TÓPICO DA CAMPANHA / SCRIPT</label>
+                <input type="text" id="campaignTopic" value="Expansão Autónoma do RD Core Digital">
+
+                <button class="ai-btn" onclick="executeAvatarCampaign()">Gerar & Executar Campanha</button>
+
+                <div class="telemetry-box">
+                    <div style="font-weight: bold; margin-bottom: 4px; color: var(--accent-green);">⚡ [NICHO SELECIONADO]</div>
+                    <div id="telemetryOutput">Pronto para gerar argumentos e campanhas de conversão.</div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- MÓDULO: MARKETPLACE INTELIGENTE (SEM VALORES) -->
-        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
-                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                        <i class="fa-solid fa-store text-sm"></i>
-                    </div>
-                    RD Global Marketplace: Serviços & Soluções Certificadas
-                </h2>
-                <span class="text-[11px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full font-mono">Sob Encomenda</span>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">🌱 Modelos Agrícolas & Fertirrigação</div>
+                <span class="badge-tag badge-agri">Solos & Rega</span>
             </div>
+            <div class="sub-box" style="margin-top: 8px;">
+                <label class="card-title">SELECIONAR MODELO DE CULTIVO</label>
+                <select id="agriModel">
+                    <option>Modelo A: Sistema de Rega Gota a Gota (Vale Fértil)</option>
+                    <option>Modelo B: Rega Subterrânea (Zona Árida / Seca)</option>
+                </select>
+                <button class="orange-btn" onclick="calculateAgriModel()">Calcular Parâmetros de Solo e Rega</button>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor flex flex-col justify-between space-y-3">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-mono bg-blue-950 text-blue-400 border border-blue-800 px-2 py-0.5 rounded">Engenharia</span>
-                            <span class="text-xs font-black text-emerald-400">Sob Consulta</span>
-                        </div>
-                        <h3 class="font-bold text-sm text-slate-200">Projeto Hidráulico Especializado</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Memória descritiva, dimensionamento de caudais e conformidade regulamentar internacional com assinatura técnica.</p>
-                    </div>
-                    <button onclick="openMarketplaceModal('Projeto Hidráulico Especializado')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 rounded-xl text-xs transition cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-file-contract mr-1.5"></i> Solicitar Projeto
-                    </button>
-                </div>
-
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor flex flex-col justify-between space-y-3">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-mono bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded">Agrotech</span>
-                            <span class="text-xs font-black text-emerald-400">Global</span>
-                        </div>
-                        <h3 class="font-bold text-sm text-slate-200">Consultoria de Rega & Fertirrigação</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Planeamento agronómico otimizado para eficiência hídrica e alta rentabilidade agrícola em qualquer região.</p>
-                    </div>
-                    <button onclick="openMarketplaceModal('Consultoria de Rega & Fertirrigação')" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-3 rounded-xl text-xs transition cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-seedling mr-1.5"></i> Solicitar Consultoria
-                    </button>
-                </div>
-
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor flex flex-col justify-between space-y-3">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded">Tech / IA</span>
-                            <span class="text-xs font-black text-emerald-400">Autónomo</span>
-                        </div>
-                        <h3 class="font-bold text-sm text-slate-200">Ecossistema Avatarix & Automação</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">Implementação de estruturas digitais autónomas de alta conversão sem custos fixos de infraestrutura.</p>
-                    </div>
-                    <button onclick="openMarketplaceModal('Ecossistema Avatarix & Automação')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-3 rounded-xl text-xs transition cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-robot mr-1.5"></i> Obter Ecossistema
-                    </button>
+                <div class="telemetry-box" id="agriSpecBox" style="display:none; color: var(--accent-orange);">
+                    <div style="font-weight: bold; margin-bottom: 4px;">🌾 Especificação Agronómica de Campo:</div>
+                    <div id="agriSpecText"></div>
                 </div>
             </div>
+        </div>
 
-            <div id="marketOutput" class="hidden bg-slate-950/80 border border-cyan-500/40 p-4 rounded-xl text-xs font-mono text-cyan-300 shadow-inner space-y-2"></div>
-        </section>
-
-        <!-- MÓDULO 1: AVATARIX GLOBAL ENGINE -->
-        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
-                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
-                    <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                        <i class="fa-solid fa-users-gear text-sm"></i>
-                    </div>
-                    Avatarix Global Engine: 12 International Niches & Autostart
-                </h2>
-                <span class="text-[11px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-mono flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Global Autostart ON
-                </span>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">🚰 Canalizar-te: Engenharia Hidráulica</div>
+                <span class="badge-tag badge-eng">Normas PEX / PPR / PVC</span>
             </div>
+            <div class="sub-box" style="margin-top: 8px;">
+                <label class="card-title">SETOR / REDE DE TUBAGEM</label>
+                <select id="pipeSector">
+                    <option>Rede de Água Fria (PN20 / Azul)</option>
+                    <option>Rede de Água Quente (PPR PN20)</option>
+                    <option>Drenagem Sanitária e Esgotos (PVC Série B)</option>
+                </select>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Select Global Fleet / Niche</label>
-                        <select id="avatarSelect" onchange="previewAvatarSelection()" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-medium cursor-pointer">
-                            <option value="Fleet 01 - Tech & AI Automation">Fleet 01 - Tech & AI Automation (Global)</option>
-                            <option value="Fleet 02 - High-Conversion Finance">Fleet 02 - High-Conversion Finance & Wealth</option>
-                            <option value="Fleet 03 - Elite Sports & Football">Fleet 03 - Elite Sports & Football Analytics</option>
-                            <option value="Fleet 04 - Advanced Hydraulic Engineering">Fleet 04 - Advanced Hydraulic Engineering (Canalizar-te)</option>
-                            <option value="Fleet 05 - Agrotech & Smart Farming">Fleet 05 - Agrotech & Smart Farming Solutions</option>
-                            <option value="Fleet 06 to 12 - Digital Products & Lifestyle">Fleet 06 to 12 - Evergreen Products, E-Commerce & Lifestyle</option>
-                        </select>
-                    </div>
+                <label class="card-title">CAUDAL PROJETADO (L/S)</label>
+                <input type="text" id="projectFlow" value="1,5">
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Global Campaign / Script Topic</label>
-                        <input type="text" id="adsTitle" value="Global RD Core & Autonomous Expansion" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
-                    </div>
-                    
-                    <button onclick="launchAvatarixCampaign()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition shadow-lg shadow-cyan-950/50 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-rocket"></i> Generate & Execute Campaign
-                    </button>
+                <button onclick="generateEngineeringMemoir()">Gerar Memória Descritiva de Projeto</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-title" style="margin-bottom:0;">▶️ Reprodutor Multimédia Inteligente</div>
+                <span class="badge-tag badge-tech">Busca & Streaming</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button class="success" style="margin:0;" onclick="setMediaType('video')">📹 Vídeo / YouTube</button>
+                <button class="secondary" style="margin:0;" onclick="setMediaType('audio')">🎵 Áudio / Stream</button>
+            </div>
+            <div class="sub-box">
+                <label class="card-title">COLE O LINK DO YOUTUBE, MP4/MP3 OU PESQUISE</label>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="mediaInput" placeholder="Ex: https://www.youtube.com/watch?v=..." style="margin:0;">
+                    <button class="success" style="width: auto; margin:0; padding: 8px 14px;" onclick="playMedia()">▶</button>
                 </div>
-
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor flex flex-col justify-between">
-                    <div>
-                        <div class="text-xs font-bold text-cyan-400 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-line"></i> International Telemetry & Script Output
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-2">Real-time prompt execution and multi-region strategy builder.</p>
-                    </div>
-                    <div id="adsOutput" class="bg-cardbg border border-bordercolor p-3.5 rounded-xl text-xs font-mono text-cyan-300 min-h-[110px] flex flex-col justify-center text-left shadow-inner space-y-1.5">
-                        <span class="text-slate-400 font-bold">⚡ [SYSTEM READY]</span>
-                        <span>Select a fleet and click generate to build a real campaign script.</span>
-                    </div>
+                <div class="desc-text" style="margin-top: 6px; margin-bottom: 4px;">FONTES DE TESTE & PRESETS DE DEMONSTRAÇÃO:</div>
+                <div class="grid-buttons">
+                    <button class="secondary" style="margin:0; font-size:10px; padding:4px;" onclick="loadPreset('video', 'dQw4w9WgXcQ')">▶ YouTube: Vídeo Demo</button>
+                    <button class="secondary" style="margin:0; font-size:10px; padding:4px;" onclick="loadPreset('mp4', 'https://www.w3schools.com/html/mov_bbb.mp4')">📁 Ficheiro MP4 Direto</button>
+                    <button class="secondary" style="margin:0; font-size:10px; padding:4px;" onclick="loadPreset('audio', 'https://www.w3schools.com/html/horse.ogg')">🎵 Stream Áudio OGG</button>
+                </div>
+                
+                <div id="mediaContainer" style="margin-top: 10px; background: #000; border-radius: 6px; min-height: 140px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); font-size: 11px; overflow: hidden;">
+                    Cole um link de vídeo/áudio acima ou selecione um preset para iniciar a reprodução.
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- MÓDULO 2: AGROTECH GLOBAL SUITE -->
-        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
-                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                        <i class="fa-solid fa-seedling text-sm"></i>
-                    </div>
-                    Agrotech Global Suite: International Farming Models
-                </h2>
-                <span class="text-[11px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full font-mono">Fertirrigação & Solos</span>
+        <div class="card">
+            <div class="section-title">⚡ Gestão de Fila de Tarefas (Supabase Auto-Refresh 5s)</div>
+            <input type="text" id="taskName" placeholder="Nova tarefa ou registo operacional...">
+            <div style="display: flex; gap: 6px;">
+                <button onclick="addTaskCustom()" style="margin:0;">Adicionar à Fila</button>
+                <button class="secondary" onclick="loadTasks()" style="margin:0; width: auto; padding: 8px 12px;">Atualizar</button>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Select Agricultural Model</label>
-                    <select id="zoneSelect" onchange="loadAgroExample()" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-medium cursor-pointer">
-                        <option value="Valley">Model A: Fertile Valley Drip System</option>
-                        <option value="Slope">Model B: Terraced Slope Management</option>
-                        <option value="Arid">Model C: Arid Zone Water Conservation</option>
-                    </select>
-                    <button onclick="loadAgroExample()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-amber-950/50 cursor-pointer active:scale-95">
-                        Calculate Soil & Drip Parameters
-                    </button>
-                </div>
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor md:col-span-2 flex flex-col justify-between">
-                    <div class="text-xs font-bold text-amber-400 mb-1.5 flex items-center gap-1.5">
-                        <i class="fa-solid fa-clipboard-list"></i> Agronomic Field Specification:
-                    </div>
-                    <div id="zoneStatus" class="text-xs font-mono text-amber-300 bg-cardbg p-3.5 rounded-xl border border-bordercolor shadow-inner space-y-1">
-                        Select a model above to calculate exact drip emitter spacing and fertigation ratios.
-                    </div>
-                </div>
+            <div style="margin-top: 10px;">
+                <ul id="taskList">
+                    <li>A carregar fila de tarefas...</li>
+                </ul>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <!-- MÓDULO 3: CANALIZAR-TE GLOBAL -->
-        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
-                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
-                    <div class="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                        <i class="fa-solid fa-faucet-drip text-sm"></i>
-                    </div>
-                    Canalizar-te Global: Multidisciplinary Engineering
-                </h2>
-                <span class="text-[11px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full font-mono">PEX / PPR / PVC Standards</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Sector / Tubagem</label>
-                    <select id="engineeringSector" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-medium cursor-pointer">
-                        <option value="Água Fria (Azul)">🔵 Rede de Água Fria (PN20 / Azul)</option>
-                        <option value="Água Quente (Vermelho)">🔴 Rede de Água Quente (PN20 / Vermelho)</option>
-                        <option value="Eletricidade & Tubagens">⚡ Condutas Elétricas & Infraestrutura</option>
-                        <option value="Saneamento PVC">🟢 Saneamento & Drenagem (PVC Série B)</option>
-                    </select>
-                </div>
-                <div class="bg-slate-950/60 p-4 rounded-xl border border-bordercolor space-y-3">
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Caudal Projetado (L/s)</label>
-                    <input type="number" id="flowRate" value="1.5" step="0.1" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
-                </div>
-                <div class="flex items-end bg-slate-950/60 p-4 rounded-xl border border-bordercolor">
-                    <button onclick="calculateMultidisciplinarySystem()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow-lg shadow-blue-950/50 cursor-pointer active:scale-95">
-                        Gerar Memória Descritiva
-                    </button>
-                </div>
-            </div>
-            <div id="hydraulicResult" class="hidden bg-slate-950/60 border border-bordercolor p-4 rounded-xl text-xs font-mono text-blue-300 shadow-inner space-y-2"></div>
-        </section>
-
-        <!-- MÓDULO 4: GLOBAL MULTIMEDIA SMART PLAYER -->
-        <section class="bg-cardbg border border-bordercolor rounded-2xl p-5 md:p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-bordercolor pb-3.5">
-                <h2 class="text-base font-extrabold flex items-center gap-2.5 text-slate-100">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                        <i class="fa-solid fa-circle-play text-sm"></i>
-                    </div>
-                    Global Multimedia Smart Player
-                </h2>
-                <span class="text-[11px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-mono">Live Search & Embed</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 bg-slate-950/60 p-2 rounded-2xl border border-bordercolor">
-                <button onclick="switchMediaMode('video')" id="tabVideo" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg cursor-pointer">
-                    <i class="fa-solid fa-video"></i> Vídeo / YouTube
-                </button>
-                <button onclick="switchMediaMode('music')" id="tabMusic" class="py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer">
-                    <i class="fa-solid fa-music"></i> Áudio / Stream
-                </button>
-            </div>
-
-            <div class="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-bordercolor">
-                <div>
-                    <label id="mediaInputLabel" class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Cole o link do YouTube, MP4/MP3 ou digite para pesquisar</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="mediaQuery" class="w-full bg-slate-900 border border-bordercolor rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Ex: https://www.youtube.com/watch?v=... ou clipe LG">
-                        <button onclick="searchAndPlayMedia()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 rounded-xl font-bold transition flex items-center justify-center shadow-lg shadow-emerald-950/50 cursor-pointer active:scale-95">
-                            <i class="fa-solid fa-play"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="pt-2 border-t border-bordercolor/60">
-                    <span class="text-[11px] font-bold text-slate-400 block mb-2 uppercase tracking-wider">Fontes de Teste & Presets de Demonstração:</span>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="playYouTubeEmbed('dQw4w9WgXcQ')" class="text-xs bg-slate-900 hover:bg-slate-800 text-cyan-400 px-3 py-1.5 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium cursor-pointer">
-                            <i class="fa-brands fa-youtube text-red-500"></i> YouTube: Vídeo Demo
-                        </button>
-                        <button onclick="quickPlay('video', 'https://www.w3schools.com/html/mov_bbb.mp4')" class="text-xs bg-slate-900 hover:bg-slate-800 text-cyan-400 px-3 py-1.5 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium cursor-pointer">
-                            <i class="fa-solid fa-file-video"></i> Ficheiro MP4 Direto
-                        </button>
-                        <button onclick="quickPlay('music', 'https://www.w3schools.com/html/horse.ogg')" class="text-xs bg-slate-900 hover:bg-slate-800 text-amber-400 px-3 py-1.5 rounded-xl border border-bordercolor transition flex items-center gap-1.5 font-medium cursor-pointer">
-                            <i class="fa-solid fa-music"></i> Stream Áudio OGG
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CONTAINER DINÂMICO DE REPRODUÇÃO REAL -->
-            <div id="mediaContainer" class="bg-black/90 rounded-2xl overflow-hidden border border-bordercolor p-2 shadow-2xl min-h-[220px] flex items-center justify-center">
-                <p id="playerPlaceholder" class="text-xs font-mono text-slate-500 text-center">
-                    Cole um link do YouTube/MP4 acima ou clique num dos botões para iniciar a reprodução real.
-                </p>
-                <iframe id="youtubePlayer" class="w-full aspect-video rounded-xl hidden" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                <video id="videoPlayer" controls class="w-full max-h-80 object-contain rounded-xl hidden"></video>
-                <audio id="audioPlayer" controls class="w-full hidden my-4 px-4"></audio>
-            </div>
-        </section>
-    </main>
-
-    <!-- SCRIPTS DO SISTEMA V20.2 -->
     <script>
-        let currentMediaMode = 'video';
         let seconds = 0;
-
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                loadAgroExample();
-                previewAvatarSelection();
-            }, 300);
-        });
-
         setInterval(() => {
             seconds++;
-            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
-            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-            const secs = String(seconds % 60).padStart(2, '0');
-            const timerEl = document.getElementById('sessionTimer');
-            if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
+            const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            document.getElementById('uptimeTimer').innerText = `${h}:${m}:${s}`;
         }, 1000);
 
-        function openMarketplaceModal(productName) {
-            const out = document.getElementById('marketOutput');
-            if (!out) return;
-            out.classList.remove('hidden');
-            out.innerHTML = `
-                <div class="font-bold text-amber-400 mb-1">🛒 [SOLICITAÇÃO REGISTADA NO MARKETPLACE]</div>
-                <div>Produto/Serviço: <span class="text-slate-100 font-bold">${productName}</span></div>
-                <div class="text-[11px] text-slate-300 mt-1">Status: Encaminhado para a central de atendimento RD Approved. O cliente/parceiro receberá as instruções por canal seguro.</div>
-                <div class="mt-2 text-[10px] text-cyan-400 font-mono">Chancela: Ronilson Dias (RD Certified) — Global Ecosystem</div>
-            `;
+        const SUPABASE_URL = 'https://uadnfsmlabucptikpgpo.supabase.co';
+        const SUPABASE_ANON_KEY = 'Sb_publishable_VWA5sqc8cTqYQYopTxFe2A_exXLszA5';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadTasks() {
+            const listEl = document.getElementById('taskList');
+            const { data, error } = await supabaseClient.from('queue').select('*').order('created_at', { ascending: false });
+            if (error) { listEl.innerHTML = `<li style="color: #f87171;">Erro ao carregar fila do sistema</li>`; return; }
+            if (!data || data.length === 0) { listEl.innerHTML = '<li>Nenhuma tarefa pendente na fila.</li>'; return; }
+            listEl.innerHTML = '';
+            data.forEach(task => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span><strong>${task.task_name}</strong></span> <span class="status-pending">${task.status}</span>`;
+                listEl.appendChild(li);
+            });
         }
 
-        function previewAvatarSelection() {
-            const avatar = document.getElementById('avatarSelect')?.value || 'Global Fleet';
-            const out = document.getElementById('adsOutput');
-            if (out) {
-                out.innerHTML = `
-                    <span class="text-cyan-400 font-bold">⚡ [NICHO SELECIONADO]</span>
-                    <span class="text-slate-200">${avatar}</span>
-                    <span class="text-slate-400 text-[10px]">Pronto para gerar argumento e campanha virótica.</span>
-                `;
-            }
+        async function addTask(taskName) {
+            await supabaseClient.from('queue').insert([{ task_name: taskName, status: 'pending' }]);
+            loadTasks();
         }
 
-        function launchAvatarixCampaign() {
-            const avatar = document.getElementById('avatarSelect')?.value || 'Global Fleet';
-            const title = document.getElementById('adsTitle')?.value || 'RD Campaign';
-            const out = document.getElementById('adsOutput');
-            if (out) {
-                out.innerHTML = `
-                    <span class="text-emerald-400 font-bold">🚀 [ROTEIRO & ANÚNCIO GERADO]</span>
-                    <span class="text-slate-200"><strong>Nicho:</strong> ${avatar}</span>
-                    <span class="text-slate-300"><strong>Hook:</strong> "Procura a melhor solução em ${title}? O RD Ecosystem tem a resposta aprovada!"</span>
-                    <span class="text-cyan-400 text-[10px]">Status: Publicação autónoma em curso sob chancela RD Approved.</span>
-                `;
-            }
+        async function handleSmartAction(actionName) {
+            await addTask('Ação Operacional: ' + actionName);
+            alert('Ação registada com sucesso: ' + actionName);
         }
 
-        function loadAgroExample() {
-            const zone = document.getElementById('zoneSelect')?.value || 'Valley';
-            const status = document.getElementById('zoneStatus');
-            if (!status) return;
+        function addTaskCustom() {
+            const input = document.getElementById('taskName');
+            const taskName = input.value.trim();
+            if (!taskName) return;
+            addTask(taskName);
+            input.value = '';
+        }
 
-            if (zone === 'Valley') {
-                status.innerHTML = `
-                    <div class="font-bold text-amber-400">🌱 MODELO FÉRTEIL (VALES & PLANÍCIES)</div>
-                    <div>• Espaçamento Gota a Gota: 30cm entre gotejadores (caudal 1.6 L/h)</div>
-                    <div>• Rácio Fertirrigação NPK: 15-5-30 (Fase de Crescimento/Frutificação)</div>
-                    <div>• Eficiência Hídrica Esperada: 94% de aproveitamento do solo</div>
-                `;
-            } else if (zone === 'Slope') {
-                status.innerHTML = `
-                    <div class="font-bold text-amber-400">🌱 MODELO SOCALCOS & DECLIVES</div>
-                    <div>• Controlo de Pressão: Válvulas reguladoras de 1.5 bar para compensação de altura</div>
-                    <div>• Frequência de Rega: 3 ciclos diários de 15 min (evita erosão do solo)</div>
-                    <div>• Cobertura Orgânica: Recomendada redução de evaporação em 40%</div>
-                `;
+        function triggerSmartAI() {
+            const input = document.getElementById('customBuildNeed');
+            const need = input.value.trim() || 'Consulta Técnica Geral';
+            addTask('Assistente de Obra: ' + need);
+            input.value = '';
+            alert('Solicitação enviada ao assistente técnico.');
+        }
+
+        function executeAvatarCampaign() {
+            const fleet = document.getElementById('avatarFleet').value;
+            const topic = document.getElementById('campaignTopic').value;
+            document.getElementById('telemetryOutput').innerHTML = `A executar frota: [${fleet}]<br>Tópico Ativo: "${topic}"<br>Estado: Sincronizado com Supabase & Autostart ON.`;
+            addTask('Campanha de Automação: ' + fleet + ' | ' + topic);
+            alert('Campanha gerada e executada com sucesso!');
+        }
+
+        function calculateAgriModel() {
+            const model = document.getElementById('agriModel').value;
+            const box = document.getElementById('agriSpecBox');
+            const text = document.getElementById('agriSpecText');
+            box.style.display = 'block';
+            if (model.includes('Vale Fértil')) {
+                text.innerHTML = `• MODELO VALE FÉRTIL (SUPERFÍCIE)<br>• Espaçamento Gota a Gota: 30cm entre gotejadores (caudal 1.6 L/h)<br>• Rácio de Fertirrigação NPK: 15-5-30 (Fase de Crescimento e Frutificação)<br>• Eficiência Hídrica Estimada: 94% de aproveitamento do solo`;
             } else {
-                status.innerHTML = `
-                    <div class="font-bold text-amber-400">🌱 MODELO ZONA SEMI-ÁRIDA / ÁRIDA</div>
-                    <div>• Sistema Complementar: Gota a gota subsuperficial com filtro de discos</div>
-                    <div>• Adubação de Fundo: Matéria orgânica com condicionamento de solo para retenção</div>
-                    <div>• Monitorização: Sensor de tensão hídrica a 20cm e 40cm de profundidade</div>
-                `;
+                text.innerHTML = `• MODELO ZONA ÁRIDA (SUBSUPERFÍCIE)<br>• Tubagem Subterrânea a 25cm com gotejadores autocompensantes<br>• Rácio de Fertirrigação NPK: 12-24-12 (Enraizamento & Alta Resistência à Seca)<br>• Eficiência Hídrica Estimada: 98% (zero evaporação superficial)`;
             }
+            addTask('Cálculo Agrotech: ' + model);
         }
 
-        function calculateMultidisciplinarySystem() {
-            const sector = document.getElementById('engineeringSector')?.value || 'Água Fria';
-            const flow = parseFloat(document.getElementById('flowRate')?.value || '1.5');
-            const res = document.getElementById('hydraulicResult');
-            if (!res) return;
-
-            let diametroPPR = "20mm";
-            if (flow > 1.2) diametroPPR = "25mm";
-            if (flow > 2.5) diametroPPR = "32mm";
-
-            res.classList.remove('hidden');
-            res.innerHTML = `
-                <div class="font-bold text-slate-200">🚰 CANALIZAR-TE — MEMÓRIA DESCRITIVA E CÁLCULO TÉCNICO</div>
-                <div>Setor de Instalação: <span class="text-cyan-400">${sector}</span></div>
-                <div>Caudal de Projeto: <span class="text-amber-400">${flow} L/s</span> | Diâmetro PPR Recomendado: <span class="text-emerald-400">${diametroPPR} (PN20)</span></div>
-                <div>Conformidade Normativa: <span class="text-emerald-400">Aprovado segundo Padrões Técnicos Internacionais</span></div>
-                <div class="mt-3 pt-2 border-t border-bordercolor flex justify-between items-center text-[11px] text-slate-400">
-                    <span>Técnico Responsável: <strong>Ronilson Dias (RD Certified)</strong></span>
-                    <span>Assinatura: ___________________________</span>
-                </div>
-            `;
+        function generateEngineeringMemoir() {
+            const sector = document.getElementById('pipeSector').value;
+            const flow = document.getElementById('projectFlow').value;
+            addTask('Canalizar-te Memória: ' + sector + ' | Caudal: ' + flow + ' L/S');
+            alert(`Memória descritiva gerada para [${sector}] com caudal de cálculo ${flow} L/S conforme padrões normativos.`);
         }
 
-        function switchMediaMode(mode) {
-            currentMediaMode = mode;
-            const btnVideo = document.getElementById('tabVideo');
-            const btnMusic = document.getElementById('tabMusic');
-            const label = document.getElementById('mediaInputLabel');
-            const queryInput = document.getElementById('mediaQuery');
+        let currentMediaType = 'video';
+        function setMediaType(type) {
+            currentMediaType = type;
+            alert('Modo multimédia definido para: ' + type.toUpperCase());
+        }
 
-            if (mode === 'video') {
-                if (btnVideo) btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg cursor-pointer";
-                if (btnMusic) btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer";
-                if (label) label.textContent = "COLE O LINK DO YOUTUBE, MP4 OU PESQUISE O VÍDEO";
-                if (queryInput) queryInput.placeholder = "Ex: https://www.youtube.com/watch?v=... ou clipe LG";
+        function playMedia() {
+            const url = document.getElementById('mediaInput').value.trim();
+            if(!url) { alert('Insira um link de multimédia válido.'); return; }
+            renderPlayer(currentMediaType, url);
+        }
+
+        function loadPreset(type, url) {
+            document.getElementById('mediaInput').value = url;
+            currentMediaType = type === 'mp4' ? 'video' : type;
+            renderPlayer(currentMediaType, url);
+        }
+
+        function renderPlayer(type, url) {
+            const container = document.getElementById('mediaContainer');
+            if (type === 'video' && url.includes('youtube.com')) {
+                const videoId = url.includes('v=') ? url.split('v=')[1].substring(0,11) : 'dQw4w9WgXcQ';
+                container.innerHTML = `<iframe width="100%" height="160" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+            } else if (type === 'video') {
+                container.innerHTML = `<video width="100%" height="160" controls autoplay><source src="${url}" type="video/mp4">O seu navegador não suporta vídeo.</video>`;
             } else {
-                if (btnMusic) btnMusic.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-lg cursor-pointer";
-                if (btnVideo) btnVideo.className = "py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 cursor-pointer";
-                if (label) label.textContent = "COLE O LINK DO ÁUDIO MP3/STREAM OU PESQUISE A MÚSICA";
-                if (queryInput) queryInput.placeholder = "Ex: https://.../audio.mp3 ou World Music";
+                container.innerHTML = `<audio controls autoplay style="width: 90%;"><source src="${url}" type="audio/ogg">O seu navegador não suporta áudio.</audio>`;
             }
         }
 
-        function extractYouTubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        function searchAndPlayMedia() {
-            const query = document.getElementById('mediaQuery')?.value.trim();
-            if (!query) {
-                alert('Por favor, cole um link do YouTube/MP4/MP3 ou escreva o nome.');
-                return;
-            }
-
-            const ytId = extractYouTubeId(query);
-            if (ytId) {
-                playYouTubeEmbed(ytId);
-                return;
-            }
-
-            if (query.startsWith('http://') || query.startsWith('https://')) {
-                if (currentMediaMode === 'video') {
-                    quickPlay('video', query);
-                } else {
-                    quickPlay('music', query);
-                }
-                return;
-            }
-
-            window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
-            playYouTubeEmbed('dQw4w9WgXcQ');
-        }
-
-        function playYouTubeEmbed(ytId) {
-            const placeholder = document.getElementById('playerPlaceholder');
-            const ytPlayer = document.getElementById('youtubePlayer');
-            const vEl = document.getElementById('videoPlayer');
-            const aEl = document.getElementById('audioPlayer');
-
-            if (placeholder) placeholder.classList.add('hidden');
-            if (vEl) { vEl.classList.add('hidden'); vEl.pause(); }
-            if (aEl) { aEl.classList.add('hidden'); aEl.pause(); }
-
-            if (ytPlayer) {
-                ytPlayer.src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
-                ytPlayer.classList.remove('hidden');
-            }
-        }
-
-        function quickPlay(mode, url) {
-            switchMediaMode(mode);
-            const placeholder = document.getElementById('playerPlaceholder');
-            const ytPlayer = document.getElementById('youtubePlayer');
-            const vEl = document.getElementById('videoPlayer');
-            const aEl = document.getElementById('audioPlayer');
-
-            if (placeholder) placeholder.classList.add('hidden');
-            if (ytPlayer) { ytPlayer.classList.add('hidden'); ytPlayer.src = ""; }
-
-            if (mode === 'video') {
-                if (aEl) { aEl.classList.add('hidden'); aEl.pause(); }
-                if (vEl) {
-                    vEl.classList.remove('hidden');
-                    vEl.src = url;
-                    vEl.load();
-                    vEl.play().catch(e => console.log("Aguardando interação para reproduzir vídeo."));
-                }
-            } else {
-                if (vEl) { vEl.classList.add('hidden'); vEl.pause(); }
-                if (aEl) {
-                    aEl.classList.add('hidden');
-                    aEl.src = url;
-                    aEl.load();
-                    aEl.play().catch(e => console.log("Aguardando interação para reproduzir áudio."));
-                }
-            }
-        }
+        loadTasks();
+        setInterval(loadTasks, 5000);
     </script>
 </body>
 </html>
