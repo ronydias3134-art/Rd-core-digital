@@ -1,26 +1,25 @@
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const signature = req.headers['x-signature'];
-  const payload = JSON.stringify(req.body);
-  
-  // Validação HMAC-SHA256
-  const hmac = crypto.createHmac('sha256', process.env.HMAC_SECRET);
-  const digest = hmac.update(payload).digest('hex');
-
-  if (!signature || signature !== digest) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
-  }
-
+export async function POST(req: Request) {
   try {
-    const { client_name, company, project_value } = req.body;
+    const signature = req.headers.get('x-signature');
+    const rawBody = await req.text();
+
+    // Validação HMAC-SHA256
+    const hmac = crypto.createHmac('sha256', process.env.HMAC_SECRET!);
+    const digest = hmac.update(rawBody).digest('hex');
+
+    if (!signature || signature !== digest) {
+      return Response.json({ error: 'Unauthorized: Invalid signature' }, { status: 401 });
+    }
+
+    const { client_name, company, project_value } = JSON.parse(rawBody);
 
     // 1. Inserir contrato na tabela b2b_contracts
     const { data: contract, error: contractError } = await supabase
@@ -44,8 +43,8 @@ export default async function handler(req, res) {
 
     if (ledgerError) throw ledgerError;
 
-    return res.status(200).json({ success: true, contract_id: contract.id });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return Response.json({ success: true, contract_id: contract.id }, { status: 200 });
+  } catch (err: any) {
+    return Response.json({ error: err.message }, { status: 500 });
   }
 }
