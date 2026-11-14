@@ -1,51 +1,64 @@
+import os
 import time
-from supabase import create_client
+import requests
+from supabase import create_client, Client
 
-# Configurações do Supabase (substitui pelos teus dados reais)
-SUPABASE_URL = "A_TUA_SUPABASE_URL"
-SUPABASE_KEY = "A_TUA_SUPABASE_KEY"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Carregar variáveis de ambiente seguras
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
-def process_workers():
-    try:
-        # 1. Processar Comandos Pendentes
-        commands = supabase.table("commands").select("*").eq("status", "pending").execute()
-        for cmd in (commands.data or []):
-            print(f"[COMANDO] A processar ID: {cmd['id']}")
-            
-            # Atualizar estado para em processamento
-            supabase.table("commands").update({"status": "processing"}).eq("id", cmd["id"]).execute()
-            
-            # Execução da lógica do comando (aqui entra a IA ou script do agente)
-            time.sleep(2)
-            
-            # Marcar como concluído
-            supabase.table("commands").update({"status": "completed"}).eq("id", cmd["id"]).execute()
-            print(f"[COMANDO] Concluído ID: {cmd['id']}")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-        # 2. Processar Fila de Produção (Fábrica de Conteúdos)
-        tasks = supabase.table("production_queue").select("*").eq("status", "queued").execute()
-        for task in (tasks.data or []):
-            print(f"[PRODUÇÃO] A produzir tarefa ID: {task['id']}")
-            
-            # Atualizar estado para em processamento
-            supabase.table("production_queue").update({"status": "processing"}).eq("id", task["id"]).execute()
-            
-            # Simulação ou integração de geração de conteúdo
-            time.sleep(3)
-            
-            # Marcar como concluído e gravar link do resultado
-            supabase.table("production_queue").update({
-                "status": "completed",
-                "result_url": "https://exemplo.com/conteudo-gerado.mp4"
-            }).eq("id", task["id"]).execute()
-            print(f"[PRODUÇÃO] Concluída tarefa ID: {task['id']}")
+def run_replacement_outworker():
+    print("A executar o worker autónomo de substituição (sem Make.com)...")
+    
+    # 1. Buscar lote de leads pendentes na tabela crm_leads
+    response = supabase.table("crm_leads").select("*").eq("status", "Prospecting").limit(5).execute()
+    leads = response.data
+    
+    if not leads:
+        print("Nenhum lead pendente encontrado com status 'Prospecting'.")
+        return
 
-    except Exception as e:
-        print(f"[ERRO NO WORKER]: {e}")
+    for lead in leads:
+        lead_id = lead["id"]
+        email = lead["email"]
+        company = lead["company_name"]
+        decision_maker = lead["decision_maker"]
+        
+        try:
+            # 2. Enviar e-mail via Resend API
+            headers = {
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "from": "Engineering Boutique <outreach@teu-dominio.com>",
+                "to": [email],
+                "subject": f"Backend capacity & workflow automation for {company}",
+                "html": f"""
+                <p>Hello {decision_maker},</p>
+                <p>We help high-growth digital agencies like {company} scale their backend architecture and eliminate workflow bottlenecks using secure Supabase and Vercel infrastructure.</p>
+                <p>Would you be open to a brief technical overview this week?</p>
+                <p>Best regards,<br>Ronilson Lopes<br>Engineering Boutique</p>
+                """
+            }
+            
+            res = requests.post("https://api.resend.com/emails", json=payload, headers=headers)
+            
+            if res.status_code in [200, 201]:
+                # 3. Atualizar estado no Supabase para 'Contacted'
+                supabase.table("crm_leads").update({"status": "Contacted"}).eq("id", lead_id).execute()
+                print(f"[SUCESSO] E-mail enviado e registado para: {email}")
+            else:
+                print(f"[ERRO] Falha ao enviar para {email}: {res.text}")
+                
+            # 4. Pausa de segurança (jitter) entre envios para proteger o domínio
+            time.sleep(5)
+            
+        except Exception as e:
+            print(f"[EXCEÇÃO] Erro ao processar {email}: {str(e)}")
 
 if __name__ == "__main__":
-    print("Worker do RD Core Digital iniciado. A escutar Supabase...")
-    while True:
-        process_workers()
-        time.sleep(10) # Verifica novos pedidos a cada 10 segundos
+    run_replacement_outworker()
