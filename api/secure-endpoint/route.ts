@@ -1,48 +1,51 @@
-import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
-// Rate limiting simples em memória
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minuto
-const MAX_REQUESTS = 20;
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-export async function POST(req: NextRequest) {
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const signature = req.headers['x-signature'];
+  const payload = JSON.stringify(req.body);
+  
+  // Validação HMAC-SHA256
+  const hmac = crypto.createHmac('sha256', process.env.HMAC_SECRET);
+  const digest = hmac.update(payload).digest('hex');
+
+  if (!signature || signature !== digest) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
+  }
+
   try {
-    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
-    const now = Date.now();
-    
-    // Controlo de Rate Limiting
-    const userLimit = rateLimitMap.get(ip) || { count: 0, lastReset: now };
-    if (now - userLimit.lastReset > RATE_LIMIT_WINDOW) {
-      userLimit.count = 1;
-      userLimit.lastReset = now;
-    } else {
-      userLimit.count++;
-      if (userLimit.count > MAX_REQUESTS) {
-        return NextResponse.json({ error: 'Demasiados pedidos. Tente mais tarde.' }, { status: 429 });
-      }
-    }
-    rateLimitMap.set(ip, userLimit);
+    const { client_name, company, project_value } = req.body;
 
-    // Validação de Assinatura HMAC-SHA256
-    const signature = req.headers.get('x-signature');
-    const bodyText = await req.text();
-    const secret = process.env.HMAC_SECRET || 'chave-secreta-padrao';
-    
-    const computedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(bodyText)
-      .digest('hex');
+    // 1. Inserir contrato na tabela b2b_contracts
+    const { data: contract, error: contractError } = await supabase
+      .from('b2b_contracts')
+      .insert([{ client_name, company, project_value, status: 'ativo' }])
+      .select()
+      .single();
 
-    if (!signature || signature !== computedSignature) {
-      return NextResponse.json({ error: 'Assinatura inválida ou não autorizada.' }, { status: 401 });
-    }
+    if (contractError) throw contractError;
 
-    const data = JSON.parse(bodyText);
+    // 2. Aplicar automaticamente a Regra 30/70 no financial_ledger
+    const warChest30 = project_value * 0.30;
+    const dividends70 = project_value * 0.70;
 
-    // Processamento bem-sucedido da requisição
-    return NextResponse.json({ success: true, message: 'Endpoint seguro operando com sucesso.', received: data });
+    const { error: ledgerError } = await supabase
+      .from('financial_ledger')
+      .insert([
+        { contract_id: contract.id, type: 'retencao_caixa_30', amount: warChest30 },
+        { contract_id: contract.id, type: 'dividendo_70', amount: dividends70 }
+      ]);
+
+    if (ledgerError) throw ledgerError;
+
+    return res.status(200).json({ success: true, contract_id: contract.id });
   } catch (err) {
-    return NextResponse.json({ error: 'Erro interno no processamento.' }, { status: 500 });
+    return res.status(500).json({ error: err.message });
   }
 }
