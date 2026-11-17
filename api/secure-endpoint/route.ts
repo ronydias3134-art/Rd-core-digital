@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       .select();
 
     if (error) {
-      if (error.code === '23505') { // Código para duplicado / unique violation
+      if (error.code === '23505') {
         return NextResponse.json({ error: 'Lead already exists' }, { status: 409 });
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
