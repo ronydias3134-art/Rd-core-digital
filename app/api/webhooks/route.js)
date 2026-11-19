@@ -1,46 +1,41 @@
-import { NextResponse } from 'next/server';
-import { headers } from 'headers';
-// Importa o teu cliente Supabase com service_role para bypassar RLS se necessário
-// import { supabaseAdmin } from '@/lib/supabaseAdmin'; 
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-export async function POST(req) {
-  const body = await req.text();
-  const signature = headers().get('stripe-signature');
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-  let event;
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
+  if (!url || !key) {
+    throw new Error("Variáveis NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY em falta.");
+  }
+
+  return createClient(url, key, {
+    auth: { persistSession: false },
+  });
+}
+
+export async function POST(req: NextRequest) {
   try {
-    // Nota: Em produção, deves validar a assinatura do webhook com o segredo do gateway
-    event = JSON.parse(body);
-  } catch (err) {
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
-  }
+    const supabase = getSupabaseClient();
+    const body = await req.json();
 
-  // Tratar o evento de pagamento bem-sucedido
-  if (event.type === 'checkout.session.completed' || event.type === 'invoice.payment_succeeded') {
-    const session = event.data.object;
-    const customerEmail = session.customer_email || session.customer_details?.email;
-    const customerId = session.customer;
+    // Exemplo de inserção na tabela de leads (ajusta o nome da tabela/colunas conforme o teu schema)
+    const { data, error } = await supabase
+      .from("leads")
+      .insert(body)
+      .select()
+      .single();
 
-    if (customerEmail) {
-      // ATUALIZAÇÃO AUTOMÁTICA NA BASE DE DADOS
-      /* 
-      const { error } = await supabaseAdmin
-        .from('users')
-        .update({ 
-          plan_status: 'active', 
-          gateway_customer_id: customerId,
-          updated_at: new Date().toISOString() 
-        })
-        .eq('email', customerEmail);
-
-      if (error) {
-        console.error('Erro ao atualizar base de dados:', error);
-        return NextResponse.json({ error: 'Database update failed' }, { status: 500 });
-      }
-      */
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
-  }
 
-  return NextResponse.json({ received: true }, { status: 200 });
+    return NextResponse.json({ ok: true, data }, { status: 201 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro interno no servidor";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
