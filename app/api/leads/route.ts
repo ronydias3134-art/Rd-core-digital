@@ -1,73 +1,41 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
-const HMAC_SECRET = process.env.RONNY_HMAC_SECRET || 'chave_seguranca_padrao';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export async function POST(request: Request) {
-    try {
-        const rawBody = await request.text();
-        const body = JSON.parse(rawBody);
-        const signature = request.headers.get('x-ronny-signature') || request.headers.get('x-signature');
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
-        // 1. Validação de Segurança HMAC (se enviada no cabeçalho)
-        if (signature) {
-            const expectedSignature = crypto
-                .createHmac('sha256', HMAC_SECRET)
-                .update(rawBody)
-                .digest('hex');
+  if (!url || !key) {
+    throw new Error("Variáveis NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY em falta.");
+  }
 
-            if (signature !== expectedSignature) {
-                return NextResponse.json(
-                    { success: false, error: 'Acesso negado: Assinatura HMAC inválida.' },
-                    { status: 403 }
-                );
-            }
-        }
+  return createClient(url, key, {
+    auth: { persistSession: false },
+  });
+}
 
-        const { client_name, company_name, company_domain, decision_maker, deal_value, email } = body;
+export async function POST(req: NextRequest) {
+  try {
+    const supabase = getSupabaseClient();
+    const body = await req.json();
 
-        if (!email) {
-            return NextResponse.json(
-                { success: false, error: 'O campo email é obrigatório.' },
-                { status: 400 }
-            );
-        }
+    // Exemplo de inserção na tabela de leads (ajusta o nome da tabela/colunas conforme o teu schema)
+    const { data, error } = await supabase
+      .from("leads")
+      .insert(body)
+      .select()
+      .single();
 
-        // 2. Inserir na tabela crm_leads (alinhado com o worker.py)
-        const { data, error } = await supabase
-            .from('crm_leads')
-            .insert([
-                {
-                    client_name: client_name || decision_maker || 'Lead B2B',
-                    company_name: company_name || company_domain || 'Empresa Alvo',
-                    decision_maker: decision_maker || client_name || 'Decisor',
-                    email: email,
-                    deal_value: deal_value || 300000,
-                    status: 'Prospecting'
-                }
-            ])
-            .select();
-
-        if (error) {
-            throw new Error(error.message);
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: 'Lead injetada na tabela crm_leads com sucesso.',
-            lead: data,
-            timestamp: new Date().toISOString()
-        }, { status: 200 });
-
-    } catch (err: any) {
-        console.error('[ERRO CRÍTICO NO MOTOR]:', err.message);
-        return NextResponse.json(
-            { success: false, error: err.message },
-            { status: 500 }
-        );
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    return NextResponse.json({ ok: true, data }, { status: 201 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro interno no servidor";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
