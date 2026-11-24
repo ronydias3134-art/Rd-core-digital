@@ -129,7 +129,11 @@ export async function POST(req: NextRequest) {
 
     if (!supabaseUrl || !serviceKey) {
       return NextResponse.json(
-        { error: "Variáveis de ambiente do Supabase em falta." },
+        {
+          error: "Variáveis de ambiente do Supabase em falta.",
+          hasUrl: Boolean(supabaseUrl),
+          hasServiceKey: Boolean(serviceKey),
+        },
         { status: 500 }
       );
     }
@@ -148,9 +152,12 @@ export async function POST(req: NextRequest) {
 
     const text = await res.text();
     if (!res.ok) {
-      console.error("[leads] Supabase REST error:", res.status, text);
       return NextResponse.json(
-        { error: "Falha ao registar lead no Supabase." },
+        {
+          error: "Falha ao registar lead no Supabase.",
+          supabaseStatus: res.status,
+          detail: text,
+        },
         { status: res.status >= 400 && res.status < 600 ? res.status : 502 }
       );
     }
@@ -164,9 +171,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, data: parsedData }, { status: 201 });
   } catch (err) {
-    console.error("[leads] Unexpected error:", err);
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: "Erro interno do servidor." },
+      { error: "Erro interno do servidor.", detail: message },
       { status: 500 }
     );
   }
