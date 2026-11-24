@@ -156,3 +156,37 @@ export async function POST(req: NextRequest) {
         {
           error: "Falha ao registar lead no Supabase.",
           supabaseStatus: res.status,
+          detail: text,
+        },
+        { status: res.status >= 400 && res.status < 600 ? res.status : 502 }
+      );
+    }
+
+    let parsedData: unknown = null;
+    try {
+      parsedData = text ? JSON.parse(text) : null;
+    } catch {
+      parsedData = text;
+    }
+
+    return NextResponse.json({ ok: true, data: parsedData }, { status: 201 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const causeObj =
+      err instanceof Error && "cause" in err && err.cause
+        ? (err.cause as { message?: string; code?: string })
+        : null;
+    const causeDetail = causeObj
+      ? `${causeObj.code ? `[${causeObj.code}] ` : ""}${causeObj.message || String(err.cause)}`
+      : null;
+
+    return NextResponse.json(
+      {
+        error: "Erro interno do servidor.",
+        detail: message,
+        cause: causeDetail,
+      },
+      { status: 500 }
+    );
+  }
+}
