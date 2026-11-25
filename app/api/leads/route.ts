@@ -1,111 +1,69 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
-
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 20;
-const ipHits = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const current = ipHits.get(ip);
-
-  if (!current || now > current.resetAt) {
-    ipHits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-
-  if (current.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
-
-  current.count += 1;
-  return true;
+interface LeadPayload {
+  name?: unknown;
+  email?: unknown;
+  origem?: unknown;
 }
 
-function verifyHmacStrict(
+function verifyHmacSignature(
   rawBody: string,
-  signatureHeader: string | null
+  signatureHeader: string | null,
+  secret: string
 ): boolean {
-  const secret = (
-    process.env.API_HMAC_SECRET ||
-    process.env.APT_HMAC_SECRET ||
-    process.env.WEBHOOK_HMAC_SECRET ||
-    process.env.WEBHOOK_SECRET ||
-    ""
-  ).trim();
+  if (!signatureHeader) return false;
 
-  if (!secret || !signatureHeader) {
-    return false;
-  }
-
-  const expectedHex = createHmac("sha256", secret)
-    .update(rawBody)
+  const providedHex = signatureHeader.trim().replace(/^sha256=/i, "");
+  const expectedHex = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody, "utf8")
     .digest("hex");
-  const normalized = signatureHeader.replace(/^sha256=/i, "").trim();
 
-  const a = Buffer.from(expectedHex, "utf8");
-  const b = Buffer.from(normalized, "utf8");
+  const providedBuf = Buffer.from(providedHex, "utf8");
+  const expectedBuf = Buffer.from(expectedHex, "utf8");
 
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  return timingSafeEqual(a, b);
-}
-
-function getSupabaseUrl(): string | null {
-  const raw = (
-    process.env.SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    ""
-  ).trim();
-  const cleaned = raw.replace(/\/+$/, "").replace(/\/rest\/v1$/i, "");
-  return cleaned || null;
+  if (providedBuf.length !== expectedBuf.length) return false;
+  return crypto.timingSafeEqual(providedBuf, expectedBuf);
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    const hmacSecret = process.env.API_HMAC_SECRET;
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!checkRateLimit(ip)) {
+    if (!hmacSecret || !supabaseUrl || !serviceRoleKey) {
       return NextResponse.json(
-        { error: "Rate limit exceeded." },
-        { status: 429 }
+        {
+          error: "Configuração do servidor incompleta.",
+          missing: {
+            API_HMAC_SECRET: !hmacSecret,
+            SUPABASE_URL: !supabaseUrl,
+            SUPABASE_SERVICE_ROLE_KEY: !serviceRoleKey,
+          },
+        },
+        { status: 500 }
       );
     }
 
     const rawBody = await req.text();
-    const sig =
-      req.headers.get("x-signature-hmac-sha256") ||
-      req.headers.get("x-signature-256") ||
-      req.headers.get("x-hub-signature-256");
+    const signature = req.headers.get("x-signature-hmac-sha256");
 
-    if (!verifyHmacStrict(rawBody, sig)) {
+    if (!verifyHmacSignature(rawBody, signature, hmacSecret)) {
       return NextResponse.json(
-        { error: "Invalid HMAC signature." },
+        { error: "Assinatura HMAC inválida." },
         { status: 401 }
       );
     }
 
-    let body: Record<string, unknown>;
+    let body: LeadPayload;
     try {
-      const parsed = JSON.parse(rawBody);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        return NextResponse.json(
-          { error: "Invalid JSON body." },
-          { status: 400 }
-        );
-      }
-      body = parsed as Record<string, unknown>;
+      body = JSON.parse(rawBody) as LeadPayload;
     } catch {
       return NextResponse.json(
-        { error: "Invalid JSON body." },
+        { error: "JSON inválido no corpo do pedido." },
         { status: 400 }
       );
     }
@@ -113,79 +71,59 @@ export async function POST(req: NextRequest) {
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const origem =
-      typeof body.origem === "string" && body.origem.trim()
+      typeof body.origem === "string" && body.origem.trim().length > 0
         ? body.origem.trim()
-        : "api";
+        : "api_leads";
 
     if (!name || !email) {
       return NextResponse.json(
-        { error: "Campos 'name' e 'email' são obrigatórios." },
+        { error: "Os campos 'name' e 'email' são obrigatórios." },
         { status: 400 }
       );
     }
 
-    const supabaseUrl = getSupabaseUrl();
-    const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+    const cleanSupabaseUrl = supabaseUrl.replace(/\/+$/, "");
+    const insertUrl = `${cleanSupabaseUrl}/rest/v1/leads`;
 
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json(
-        {
-          error: "Variáveis de ambiente do Supabase em falta.",
-          hasUrl: Boolean(supabaseUrl),
-          hasServiceKey: Boolean(serviceKey),
-        },
-        { status: 500 }
-      );
-    }
-
-    const targetUrl = `${supabaseUrl}/rest/v1/leads`;
-    const res = await fetch(targetUrl, {
+    const supaRes = await fetch(insertUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
         Prefer: "return=representation",
       },
-      body: JSON.stringify({ name, email, origem }),
+      body: JSON.stringify([{ name, email, origem }]),
     });
 
-    const text = await res.text();
-    if (!res.ok) {
+    const supaText = await supaRes.text();
+    let supaData: unknown = supaText;
+    try {
+      supaData = supaText ? JSON.parse(supaText) : null;
+    } catch {
+      // mantém texto bruto caso não seja JSON
+    }
+
+    if (!supaRes.ok) {
       return NextResponse.json(
         {
           error: "Falha ao registar lead no Supabase.",
-          supabaseStatus: res.status,
-          detail: text,
+          supabaseStatus: supaRes.status,
+          detail: supaData,
         },
-        { status: res.status >= 400 && res.status < 600 ? res.status : 502 }
+        { status: supaRes.status >= 400 && supaRes.status < 500 ? 400 : 502 }
       );
     }
 
-    let parsedData: unknown = null;
-    try {
-      parsedData = text ? JSON.parse(text) : null;
-    } catch {
-      parsedData = text;
-    }
-
-    return NextResponse.json({ ok: true, data: parsedData }, { status: 201 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    const causeObj =
-      err instanceof Error && "cause" in err && err.cause
-        ? (err.cause as { message?: string; code?: string })
-        : null;
-    const causeDetail = causeObj
-      ? `${causeObj.code ? `[${causeObj.code}] ` : ""}${causeObj.message || String(err.cause)}`
-      : null;
-
+    const createdRecord = Array.isArray(supaData) ? supaData[0] : supaData;
     return NextResponse.json(
-      {
-        error: "Erro interno do servidor.",
-        detail: message,
-        cause: causeDetail,
-      },
+      { ok: true, lead: createdRecord },
+      { status: 201 }
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
+    return NextResponse.json(
+      { error: "Erro interno do servidor.", detail: message },
       { status: 500 }
     );
   }
