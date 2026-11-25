@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 interface LeadPayload {
   name?: unknown;
+  nome?: unknown;
   email?: unknown;
   origem?: unknown;
 }
@@ -68,16 +69,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const rawName = body.name ?? body.nome;
+    const nome = typeof rawName === "string" ? rawName.trim() : "";
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const origem =
       typeof body.origem === "string" && body.origem.trim().length > 0
         ? body.origem.trim()
         : "api_leads";
 
-    if (!name || !email) {
+    if (!nome || !email) {
       return NextResponse.json(
-        { error: "Os campos 'name' e 'email' são obrigatórios." },
+        { error: "Os campos 'name' (ou 'nome') e 'email' são obrigatórios." },
         { status: 400 }
       );
     }
@@ -93,7 +95,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${serviceRoleKey}`,
         Prefer: "return=representation",
       },
-      body: JSON.stringify([{ name, email, origem }]),
+      body: JSON.stringify([{ nome, email, origem }]),
     });
 
     const supaText = await supaRes.text();
