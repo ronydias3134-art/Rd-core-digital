@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 interface LeadPayload {
   name?: unknown;
   nome?: unknown;
+  company_name?: unknown;
+  decision_maker?: unknown;
   email?: unknown;
   origem?: unknown;
 }
@@ -69,19 +71,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const rawName = body.name ?? body.nome;
-    const nome = typeof rawName === "string" ? rawName.trim() : "";
-    const email = typeof body.email === "string" ? body.email.trim() : "";
-    const origem =
-      typeof body.origem === "string" && body.origem.trim().length > 0
-        ? body.origem.trim()
-        : "api_leads";
+    const rawCompany = body.company_name ?? body.name ?? body.nome;
+    const companyName =
+      typeof rawCompany === "string" ? rawCompany.trim() : "";
 
-    if (!nome || !email) {
+    const rawDecisionMaker = body.decision_maker ?? body.nome ?? body.name;
+    const decisionMaker =
+      typeof rawDecisionMaker === "string" && rawDecisionMaker.trim().length > 0
+        ? rawDecisionMaker.trim()
+        : null;
+
+    const email = typeof body.email === "string" ? body.email.trim() : "";
+
+    if (!companyName || !email) {
       return NextResponse.json(
-        { error: "Os campos 'name' (ou 'nome') e 'email' são obrigatórios." },
+        {
+          error:
+            "Os campos 'company_name' (ou 'name'/'nome') e 'email' são obrigatórios.",
+        },
         { status: 400 }
       );
+    }
+
+    const rowToInsert: Record<string, unknown> = {
+      company_name: companyName,
+      email,
+    };
+
+    if (decisionMaker) {
+      rowToInsert.decision_maker = decisionMaker;
     }
 
     const cleanSupabaseUrl = supabaseUrl.replace(/\/+$/, "");
@@ -95,7 +113,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${serviceRoleKey}`,
         Prefer: "return=representation",
       },
-      body: JSON.stringify([{ nome, email, origem }]),
+      body: JSON.stringify([rowToInsert]),
     });
 
     const supaText = await supaRes.text();
