@@ -9,7 +9,8 @@ const globalForPg = globalThis as unknown as {
 };
 
 function getPool(): Pool {
-  const connectionString = process.env.SUPABASE_DB_URL;
+  const connectionString =
+    process.env.SUPABASE_DB_URL || process.env.supabase_db_url;
   if (!connectionString) {
     throw new Error("Variável de ambiente SUPABASE_DB_URL não configurada.");
   }
@@ -39,7 +40,8 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const expectedKey = process.env.ENZO_API_KEY;
+    const expectedKey =
+      process.env.ENZO_API_KEY || process.env.enzo_api_key;
     const providedKey = req.headers.get("x-enzo-key");
 
     if (!expectedKey) {
