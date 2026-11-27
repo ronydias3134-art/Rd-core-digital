@@ -1,11 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const operatorApiKey = process.env.OPERATOR_DECISION_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+export const runtime = 'nodejs';
 
 const ALLOWED_ACTIONS = [
   'lead_enrichment',
@@ -19,25 +16,64 @@ type AllowedAction = (typeof ALLOWED_ACTIONS)[number];
 interface LeadMapInput {
   companyName: string;
   email: string;
-  source?: string;
-  initialAction?: AllowedAction;
+  source: string;
+  initialAction: AllowedAction;
   contextNotes?: string;
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateLeadInput(rawInput: unknown): {
-  valid: boolean;
-  data?: LeadMapInput;
-  error?: string;
-} {
+function timingSafeEqualUtf8(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length || bufA.length === 0) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+function verifyHmacSignature(rawBody: string, signatureHeader: string | null, secret: string): boolean {
+  if (!secret || !signatureHeader) {
+    return false;
+  }
+
+  const normalizedHeader = signatureHeader.trim().replace(/^sha256=/i, '').toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(normalizedHeader)) {
+    return false;
+  }
+
+  const expectedHex = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody, 'utf8')
+    .digest('hex')
+    .toLowerCase();
+
+  return timingSafeEqualUtf8(normalizedHeader, expectedHex);
+}
+
+function isAuthorizedRequest(req: NextRequest, rawBody: string): boolean {
+  const hmacSecret = (process.env.API_HMAC_SECRET || process.env.WEBHOOK_SECRET || '').trim();
+  const operatorKey = (process.env.OPERATOR_DECISION_KEY || '').trim();
+
+  const signatureHeader = req.headers.get('x-signature-256') || req.headers.get('x-hmac-signature');
+  const providedOperatorKey = req.headers.get('x-operator-key');
+
+  const hmacValid = hmacSecret ? verifyHmacSignature(rawBody, signatureHeader, hmacSecret) : false;
+  const operatorValid =
+    operatorKey && providedOperatorKey ? timingSafeEqualUtf8(providedOperatorKey.trim(), operatorKey) : false;
+
+  return hmacValid || operatorValid;
+}
+
+function validateLeadInput(
+  rawInput: unknown
+): { valid: true; data: LeadMapInput } | { valid: false; error: string } {
   if (!rawInput || typeof rawInput !== 'object' || Array.isArray(rawInput)) {
     return { valid: false, error: 'Corpo do pedido inválido (esperado objeto JSON).' };
   }
 
   const raw = rawInput as Record<string, unknown>;
-  const companyName =
-    typeof raw.companyName === 'string' ? raw.companyName.trim() : '';
+  const companyName = typeof raw.companyName === 'string' ? raw.companyName.trim() : '';
   const email = typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
   const source =
     typeof raw.source === 'string' && raw.source.trim().length > 0
@@ -79,60 +115,103 @@ function validateLeadInput(rawInput: unknown): {
   };
 }
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      Allow: 'OPTIONS, POST',
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verificação de chave do operador
-    const providedKey = req.headers.get('x-operator-key');
-    if (!operatorApiKey || providedKey !== operatorApiKey) {
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim();
+    const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: 'Configuração de base de dados incompleta no servidor.' },
+        { status: 500 }
+      );
+    }
+
+    const rawBodyBytes = Buffer.from(await req.arrayBuffer());
+    const rawBody = rawBodyBytes.toString('utf8');
+
+    if (!isAuthorizedRequest(req, rawBody)) {
       return NextResponse.json({ error: 'Acesso não autorizado.' }, { status: 401 });
     }
 
-    // 2. Parse e validação estrita de schema
     let body: unknown;
     try {
-      body = await req.json();
+      body = rawBody ? JSON.parse(rawBody) : null;
     } catch {
       return NextResponse.json({ error: 'JSON malformado.' }, { status: 400 });
     }
 
     const parsed = validateLeadInput(body);
-    if (!parsed.valid || !parsed.data) {
+    if (!parsed.valid) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
     const { companyName, email, source, initialAction, contextNotes } = parsed.data;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
-    // 3. Inserir ou reutilizar lead na tabela b2b_leads
-    const { data: insertedLead, error: leadError } = await supabase
+    let leadRecord: { id: string; company_name: string; email: string; source: string; status: string } | null = null;
+    let createdNewLead = false;
+
+    const { data: existingLead, error: lookupError } = await supabase
       .from('b2b_leads')
-      .insert({
-        company_name: companyName,
-        email,
-        source,
-        status: 'new',
-      })
       .select('id, company_name, email, source, status')
-      .single();
+      .eq('email', email)
+      .maybeSingle();
 
-    if (leadError || !insertedLead) {
+    if (lookupError) {
       return NextResponse.json(
-        { error: 'Erro ao gravar lead na b2b_leads.', details: leadError?.message },
+        { error: 'Erro ao consultar lead na b2b_leads.', details: lookupError.message },
         { status: 500 }
       );
     }
 
-    // 4. Criar ação na robot_action_queue sempre em pending_approval (sem envio automático)
+    if (existingLead) {
+      leadRecord = existingLead;
+    } else {
+      const { data: insertedLead, error: leadError } = await supabase
+        .from('b2b_leads')
+        .insert({
+          company_name: companyName,
+          email,
+          source,
+          status: 'new',
+        })
+        .select('id, company_name, email, source, status')
+        .single();
+
+      if (leadError || !insertedLead) {
+        return NextResponse.json(
+          { error: 'Erro ao gravar lead na b2b_leads.', details: leadError?.message },
+          { status: 500 }
+        );
+      }
+
+      leadRecord = insertedLead;
+      createdNewLead = true;
+    }
+
     const { data: queuedAction, error: queueError } = await supabase
       .from('robot_action_queue')
       .insert({
-        lead_id: insertedLead.id,
+        lead_id: leadRecord.id,
         action_type: initialAction,
         approval_status: 'pending_approval',
         operator_decision_at: null,
         payload: {
-          company_name: insertedLead.company_name,
-          email: insertedLead.email,
-          source: insertedLead.source,
+          company_name: leadRecord.company_name,
+          email: leadRecord.email,
+          source: leadRecord.source,
           auto_execute: false,
           requires_human_approval: true,
           ...(contextNotes ? { context_notes: contextNotes } : {}),
@@ -142,8 +221,11 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (queueError || !queuedAction) {
+      if (createdNewLead) {
+        await supabase.from('b2b_leads').delete().eq('id', leadRecord.id);
+      }
       return NextResponse.json(
-        { error: 'Lead criada, mas falhou ao enfileirar ação.', details: queueError?.message },
+        { error: 'Falha ao enfileirar ação na robot_action_queue.', details: queueError?.message },
         { status: 500 }
       );
     }
@@ -151,8 +233,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         ok: true,
+        deduplicated_lead: !createdNewLead,
         message: 'Lead registada e ação colocada em pending_approval para tua decisão.',
-        lead: insertedLead,
+        lead: leadRecord,
         action: queuedAction,
       },
       { status: 201 }
