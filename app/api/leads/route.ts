@@ -25,7 +25,16 @@ type ValidationResult =
   | { valid: true; data: LeadMapInput; error?: never }
   | { valid: false; error: string; data?: never };
 
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 8;
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
 
 function timingSafeEqualUtf8(a: string, b: string): boolean {
   const bufA = Buffer.from(a, 'utf8');
@@ -83,6 +92,54 @@ function isAuthorizedRequest(req: NextRequest, rawBody: string): boolean {
       : false;
 
   return hmacValid || operatorValid;
+}
+
+function getClientRateLimitKey(req: NextRequest): string {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  const firstForwardedIp = forwardedFor ? forwardedFor.split(',')[0]?.trim() : '';
+  const realIp = req.headers.get('x-real-ip')?.trim() || '';
+  const ip = firstForwardedIp || realIp || 'unknown-client';
+  return `leads:${ip}`;
+}
+
+function checkRateLimit(key: string, nowMs: number = Date.now()): {
+  allowed: boolean;
+  retryAfterSeconds: number;
+  remaining: number;
+} {
+  for (const [entryKey, entry] of rateLimitStore.entries()) {
+    if (entry.resetAt <= nowMs) {
+      rateLimitStore.delete(entryKey);
+    }
+  }
+
+  const current = rateLimitStore.get(key);
+  if (!current || current.resetAt <= nowMs) {
+    const resetAt = nowMs + RATE_LIMIT_WINDOW_MS;
+    rateLimitStore.set(key, { count: 1, resetAt });
+    return {
+      allowed: true,
+      retryAfterSeconds: Math.ceil(RATE_LIMIT_WINDOW_MS / 1000),
+      remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - 1),
+    };
+  }
+
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
+    const retryAfterSeconds = Math.max(1, Math.ceil((current.resetAt - nowMs) / 1000));
+    return {
+      allowed: false,
+      retryAfterSeconds,
+      remaining: 0,
+    };
+  }
+
+  current.count += 1;
+  rateLimitStore.set(key, current);
+  return {
+    allowed: true,
+    retryAfterSeconds: Math.max(1, Math.ceil((current.resetAt - nowMs) / 1000)),
+    remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - current.count),
+  };
 }
 
 function validateLeadInput(rawInput: unknown): ValidationResult {
@@ -158,6 +215,26 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
+    const rateKey = getClientRateLimitKey(req);
+    const rateResult = checkRateLimit(rateKey);
+
+    if (!rateResult.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Limite de pedidos excedido (rate limit). Tenta novamente em instantes.',
+          retry_after_seconds: rateResult.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateResult.retryAfterSeconds),
+            'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
+
     const supabaseUrl = (
       process.env.NEXT_PUBLIC_SUPABASE_URL ||
       process.env.SUPABASE_URL ||
@@ -300,7 +377,13 @@ export async function POST(req: NextRequest) {
         lead: leadRecord,
         action: queuedAction,
       },
-      { status: 201 }
+      {
+        status: 201,
+        headers: {
+          'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+          'X-RateLimit-Remaining': String(rateResult.remaining),
+        },
+      }
     );
   } catch {
     return NextResponse.json(
