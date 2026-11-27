@@ -21,6 +21,10 @@ interface LeadMapInput {
   contextNotes?: string;
 }
 
+type ValidationResult =
+  | { valid: true; data: LeadMapInput; error?: never }
+  | { valid: false; error: string; data?: never };
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function timingSafeEqualUtf8(a: string, b: string): boolean {
@@ -32,12 +36,19 @@ function timingSafeEqualUtf8(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-function verifyHmacSignature(rawBody: string, signatureHeader: string | null, secret: string): boolean {
+function verifyHmacSignature(
+  rawBody: string,
+  signatureHeader: string | null,
+  secret: string
+): boolean {
   if (!secret || !signatureHeader) {
     return false;
   }
 
-  const normalizedHeader = signatureHeader.trim().replace(/^sha256=/i, '').toLowerCase();
+  const normalizedHeader = signatureHeader
+    .trim()
+    .replace(/^sha256=/i, '')
+    .toLowerCase();
   if (!/^[0-9a-f]{64}$/.test(normalizedHeader)) {
     return false;
   }
@@ -52,29 +63,41 @@ function verifyHmacSignature(rawBody: string, signatureHeader: string | null, se
 }
 
 function isAuthorizedRequest(req: NextRequest, rawBody: string): boolean {
-  const hmacSecret = (process.env.API_HMAC_SECRET || process.env.WEBHOOK_SECRET || '').trim();
+  const hmacSecret = (
+    process.env.API_HMAC_SECRET ||
+    process.env.WEBHOOK_SECRET ||
+    ''
+  ).trim();
   const operatorKey = (process.env.OPERATOR_DECISION_KEY || '').trim();
 
-  const signatureHeader = req.headers.get('x-signature-256') || req.headers.get('x-hmac-signature');
+  const signatureHeader =
+    req.headers.get('x-signature-256') || req.headers.get('x-hmac-signature');
   const providedOperatorKey = req.headers.get('x-operator-key');
 
-  const hmacValid = hmacSecret ? verifyHmacSignature(rawBody, signatureHeader, hmacSecret) : false;
+  const hmacValid = hmacSecret
+    ? verifyHmacSignature(rawBody, signatureHeader, hmacSecret)
+    : false;
   const operatorValid =
-    operatorKey && providedOperatorKey ? timingSafeEqualUtf8(providedOperatorKey.trim(), operatorKey) : false;
+    operatorKey && providedOperatorKey
+      ? timingSafeEqualUtf8(providedOperatorKey.trim(), operatorKey)
+      : false;
 
   return hmacValid || operatorValid;
 }
 
-function validateLeadInput(
-  rawInput: unknown
-): { valid: true; data: LeadMapInput } | { valid: false; error: string } {
+function validateLeadInput(rawInput: unknown): ValidationResult {
   if (!rawInput || typeof rawInput !== 'object' || Array.isArray(rawInput)) {
-    return { valid: false, error: 'Corpo do pedido inválido (esperado objeto JSON).' };
+    return {
+      valid: false,
+      error: 'Corpo do pedido inválido (esperado objeto JSON).',
+    };
   }
 
   const raw = rawInput as Record<string, unknown>;
-  const companyName = typeof raw.companyName === 'string' ? raw.companyName.trim() : '';
-  const email = typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
+  const companyName =
+    typeof raw.companyName === 'string' ? raw.companyName.trim() : '';
+  const email =
+    typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
   const source =
     typeof raw.source === 'string' && raw.source.trim().length > 0
       ? raw.source.trim()
@@ -92,15 +115,24 @@ function validateLeadInput(
       : 'lead_enrichment';
 
   if (!companyName || companyName.length < 2) {
-    return { valid: false, error: 'O campo companyName é obrigatório.' };
+    return {
+      valid: false,
+      error: 'O campo companyName é obrigatório.',
+    };
   }
 
   if (!email || !EMAIL_REGEX.test(email)) {
-    return { valid: false, error: 'O campo email é obrigatório e deve ser válido.' };
+    return {
+      valid: false,
+      error: 'O campo email é obrigatório e deve ser válido.',
+    };
   }
 
   if (contextNotes && contextNotes.length > 1000) {
-    return { valid: false, error: 'contextNotes excede o limite de 1000 caracteres.' };
+    return {
+      valid: false,
+      error: 'contextNotes excede o limite de 1000 caracteres.',
+    };
   }
 
   return {
@@ -126,8 +158,14 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim();
-    const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+    const supabaseUrl = (
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      process.env.SUPABASE_URL ||
+      ''
+    ).trim();
+    const supabaseServiceKey = (
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    ).trim();
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
@@ -140,27 +178,41 @@ export async function POST(req: NextRequest) {
     const rawBody = rawBodyBytes.toString('utf8');
 
     if (!isAuthorizedRequest(req, rawBody)) {
-      return NextResponse.json({ error: 'Acesso não autorizado.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Acesso não autorizado.' },
+        { status: 401 }
+      );
     }
 
     let body: unknown;
     try {
       body = rawBody ? JSON.parse(rawBody) : null;
     } catch {
-      return NextResponse.json({ error: 'JSON malformado.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'JSON malformado.' },
+        { status: 400 }
+      );
     }
 
-    const parsed = validateLeadInput(body);
+    const parsed: ValidationResult = validateLeadInput(body);
     if (!parsed.valid) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
-    const { companyName, email, source, initialAction, contextNotes } = parsed.data;
+    const { companyName, email, source, initialAction, contextNotes } =
+      parsed.data;
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    let leadRecord: { id: string; company_name: string; email: string; source: string; status: string } | null = null;
+    let leadRecord: {
+      id: string;
+      company_name: string;
+      email: string;
+      source: string;
+      status: string;
+    } | null = null;
     let createdNewLead = false;
 
     const { data: existingLead, error: lookupError } = await supabase
@@ -171,7 +223,10 @@ export async function POST(req: NextRequest) {
 
     if (lookupError) {
       return NextResponse.json(
-        { error: 'Erro ao consultar lead na b2b_leads.', details: lookupError.message },
+        {
+          error: 'Erro ao consultar lead na b2b_leads.',
+          details: lookupError.message,
+        },
         { status: 500 }
       );
     }
@@ -192,7 +247,10 @@ export async function POST(req: NextRequest) {
 
       if (leadError || !insertedLead) {
         return NextResponse.json(
-          { error: 'Erro ao gravar lead na b2b_leads.', details: leadError?.message },
+          {
+            error: 'Erro ao gravar lead na b2b_leads.',
+            details: leadError?.message,
+          },
           { status: 500 }
         );
       }
@@ -225,7 +283,10 @@ export async function POST(req: NextRequest) {
         await supabase.from('b2b_leads').delete().eq('id', leadRecord.id);
       }
       return NextResponse.json(
-        { error: 'Falha ao enfileirar ação na robot_action_queue.', details: queueError?.message },
+        {
+          error: 'Falha ao enfileirar ação na robot_action_queue.',
+          details: queueError?.message,
+        },
         { status: 500 }
       );
     }
@@ -234,13 +295,17 @@ export async function POST(req: NextRequest) {
       {
         ok: true,
         deduplicated_lead: !createdNewLead,
-        message: 'Lead registada e ação colocada em pending_approval para tua decisão.',
+        message:
+          'Lead registada e ação colocada em pending_approval para tua decisão.',
         lead: leadRecord,
         action: queuedAction,
       },
       { status: 201 }
     );
   } catch {
-    return NextResponse.json({ error: 'Erro interno no servidor.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno no servidor.' },
+      { status: 500 }
+    );
   }
 }
