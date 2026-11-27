@@ -1,14 +1,14 @@
-import crypto from 'node:crypto';
-import { createClient } from '@supabase/supabase-js';
-import { NextRequest, NextResponse } from 'next/server';
+import crypto from "node:crypto";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 const ALLOWED_ACTIONS = [
-  'lead_enrichment',
-  'outreach_draft',
-  'follow_up_draft',
-  'sample_preparation',
+  "lead_enrichment",
+  "outreach_draft",
+  "follow_up_draft",
+  "sample_preparation",
 ] as const;
 
 type AllowedAction = (typeof ALLOWED_ACTIONS)[number];
@@ -25,20 +25,13 @@ type ValidationResult =
   | { valid: true; data: LeadMapInput; error?: never }
   | { valid: false; error: string; data?: never };
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_WINDOW_SECONDS = 60;
 const RATE_LIMIT_MAX_REQUESTS = 8;
 
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
 function timingSafeEqualUtf8(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, 'utf8');
-  const bufB = Buffer.from(b, 'utf8');
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
   if (bufA.length !== bufB.length || bufA.length === 0) {
     return false;
   }
@@ -56,16 +49,16 @@ function verifyHmacSignature(
 
   const normalizedHeader = signatureHeader
     .trim()
-    .replace(/^sha256=/i, '')
+    .replace(/^sha256=/i, "")
     .toLowerCase();
   if (!/^[0-9a-f]{64}$/.test(normalizedHeader)) {
     return false;
   }
 
   const expectedHex = crypto
-    .createHmac('sha256', secret)
-    .update(rawBody, 'utf8')
-    .digest('hex')
+    .createHmac("sha256", secret)
+    .update(rawBody, "utf8")
+    .digest("hex")
     .toLowerCase();
 
   return timingSafeEqualUtf8(normalizedHeader, expectedHex);
@@ -74,14 +67,15 @@ function verifyHmacSignature(
 function isAuthorizedRequest(req: NextRequest, rawBody: string): boolean {
   const hmacSecret = (
     process.env.API_HMAC_SECRET ||
+    process.env.WEBHOOK_HMAC_SECRET ||
     process.env.WEBHOOK_SECRET ||
-    ''
+    ""
   ).trim();
-  const operatorKey = (process.env.OPERATOR_DECISION_KEY || '').trim();
+  const operatorKey = (process.env.OPERATOR_DECISION_KEY || "").trim();
 
   const signatureHeader =
-    req.headers.get('x-signature-256') || req.headers.get('x-hmac-signature');
-  const providedOperatorKey = req.headers.get('x-operator-key');
+    req.headers.get("x-signature-256") || req.headers.get("x-hmac-signature");
+  const providedOperatorKey = req.headers.get("x-operator-key");
 
   const hmacValid = hmacSecret
     ? verifyHmacSignature(rawBody, signatureHeader, hmacSecret)
@@ -95,100 +89,129 @@ function isAuthorizedRequest(req: NextRequest, rawBody: string): boolean {
 }
 
 function getClientRateLimitKey(req: NextRequest): string {
-  const forwardedFor = req.headers.get('x-forwarded-for');
-  const firstForwardedIp = forwardedFor ? forwardedFor.split(',')[0]?.trim() : '';
-  const realIp = req.headers.get('x-real-ip')?.trim() || '';
-  const ip = firstForwardedIp || realIp || 'unknown-client';
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const firstForwardedIp = forwardedFor ? forwardedFor.split(",")[0]?.trim() : "";
+  const realIp = req.headers.get("x-real-ip")?.trim() || "";
+  const ip = firstForwardedIp || realIp || "unknown-client";
   return `leads:${ip}`;
 }
 
-function checkRateLimit(key: string, nowMs: number = Date.now()): {
+function getSupabaseAdminClient(): SupabaseClient | null {
+  const supabaseUrl = (
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    ""
+  ).trim();
+  const supabaseServiceKey = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  ).trim();
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+async function consumePersistentRateLimit(
+  supabase: SupabaseClient,
+  rateKey: string
+): Promise<{
   allowed: boolean;
   retryAfterSeconds: number;
   remaining: number;
-} {
-  for (const [entryKey, entry] of rateLimitStore.entries()) {
-    if (entry.resetAt <= nowMs) {
-      rateLimitStore.delete(entryKey);
-    }
-  }
+  dbError: boolean;
+}> {
+  const { data, error } = await supabase.rpc("consume_rate_limit", {
+    p_rate_key: rateKey,
+    p_window_seconds: RATE_LIMIT_WINDOW_SECONDS,
+    p_max_requests: RATE_LIMIT_MAX_REQUESTS,
+  });
 
-  const current = rateLimitStore.get(key);
-  if (!current || current.resetAt <= nowMs) {
-    const resetAt = nowMs + RATE_LIMIT_WINDOW_MS;
-    rateLimitStore.set(key, { count: 1, resetAt });
-    return {
-      allowed: true,
-      retryAfterSeconds: Math.ceil(RATE_LIMIT_WINDOW_MS / 1000),
-      remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - 1),
-    };
-  }
-
-  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
-    const retryAfterSeconds = Math.max(1, Math.ceil((current.resetAt - nowMs) / 1000));
+  if (error || !data) {
     return {
       allowed: false,
-      retryAfterSeconds,
+      retryAfterSeconds: RATE_LIMIT_WINDOW_SECONDS,
       remaining: 0,
+      dbError: true,
     };
   }
 
-  current.count += 1;
-  rateLimitStore.set(key, current);
+  const row = Array.isArray(data) ? data[0] : data;
+  const currentCount =
+    typeof row?.current_count === "number"
+      ? row.current_count
+      : RATE_LIMIT_MAX_REQUESTS + 1;
+  const allowed = Boolean(row?.allowed);
+  const retryAfterSeconds =
+    typeof row?.retry_after_seconds === "number" && row.retry_after_seconds > 0
+      ? row.retry_after_seconds
+      : RATE_LIMIT_WINDOW_SECONDS;
+  const remaining = Math.max(0, RATE_LIMIT_MAX_REQUESTS - currentCount);
+
   return {
-    allowed: true,
-    retryAfterSeconds: Math.max(1, Math.ceil((current.resetAt - nowMs) / 1000)),
-    remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - current.count),
+    allowed,
+    retryAfterSeconds,
+    remaining,
+    dbError: false,
   };
 }
 
 function validateLeadInput(rawInput: unknown): ValidationResult {
-  if (!rawInput || typeof rawInput !== 'object' || Array.isArray(rawInput)) {
+  if (!rawInput || typeof rawInput !== "object" || Array.isArray(rawInput)) {
     return {
       valid: false,
-      error: 'Corpo do pedido inválido (esperado objeto JSON).',
+      error: "Corpo do pedido inválido (esperado objeto JSON).",
     };
   }
 
   const raw = rawInput as Record<string, unknown>;
   const companyName =
-    typeof raw.companyName === 'string' ? raw.companyName.trim() : '';
+    typeof raw.companyName === "string"
+      ? raw.companyName.trim()
+      : typeof raw.company_name === "string"
+      ? raw.company_name.trim()
+      : "";
   const email =
-    typeof raw.email === 'string' ? raw.email.trim().toLowerCase() : '';
+    typeof raw.email === "string" ? raw.email.trim().toLowerCase() : "";
   const source =
-    typeof raw.source === 'string' && raw.source.trim().length > 0
+    typeof raw.source === "string" && raw.source.trim().length > 0
       ? raw.source.trim()
-      : 'market_mapping';
+      : "market_mapping";
   const contextNotes =
-    typeof raw.contextNotes === 'string' && raw.contextNotes.trim().length > 0
+    typeof raw.contextNotes === "string" && raw.contextNotes.trim().length > 0
       ? raw.contextNotes.trim()
+      : typeof raw.context_notes === "string" && raw.context_notes.trim().length > 0
+      ? raw.context_notes.trim()
       : undefined;
 
   const requestedAction = raw.initialAction;
   const initialAction: AllowedAction =
-    typeof requestedAction === 'string' &&
+    typeof requestedAction === "string" &&
     (ALLOWED_ACTIONS as readonly string[]).includes(requestedAction)
       ? (requestedAction as AllowedAction)
-      : 'lead_enrichment';
+      : "lead_enrichment";
 
   if (!companyName || companyName.length < 2) {
     return {
       valid: false,
-      error: 'O campo companyName é obrigatório.',
+      error: "O campo companyName é obrigatório.",
     };
   }
 
   if (!email || !EMAIL_REGEX.test(email)) {
     return {
       valid: false,
-      error: 'O campo email é obrigatório e deve ser válido.',
+      error: "O campo email é obrigatório e deve ser válido.",
     };
   }
 
   if (contextNotes && contextNotes.length > 1000) {
     return {
       valid: false,
-      error: 'contextNotes excede o limite de 1000 caracteres.',
+      error: "contextNotes excede o limite de 1000 caracteres.",
     };
   }
 
@@ -208,55 +231,67 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      Allow: 'OPTIONS, POST',
+      Allow: "OPTIONS, POST",
     },
   });
 }
 
+export async function GET() {
+  return NextResponse.json(
+    { error: "Método não permitido." },
+    {
+      status: 405,
+      headers: {
+        Allow: "OPTIONS, POST",
+      },
+    }
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Configuração de base de dados incompleta no servidor." },
+        { status: 500 }
+      );
+    }
+
     const rateKey = getClientRateLimitKey(req);
-    const rateResult = checkRateLimit(rateKey);
+    const rateResult = await consumePersistentRateLimit(supabase, rateKey);
+
+    if (rateResult.dbError) {
+      return NextResponse.json(
+        { error: "Falha ao validar limite de pedidos na base de dados." },
+        { status: 502 }
+      );
+    }
 
     if (!rateResult.allowed) {
       return NextResponse.json(
         {
-          error: 'Limite de pedidos excedido (rate limit). Tenta novamente em instantes.',
+          error:
+            "Limite de pedidos excedido (rate limit). Tenta novamente em instantes.",
           retry_after_seconds: rateResult.retryAfterSeconds,
         },
         {
           status: 429,
           headers: {
-            'Retry-After': String(rateResult.retryAfterSeconds),
-            'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
-            'X-RateLimit-Remaining': '0',
+            "Retry-After": String(rateResult.retryAfterSeconds),
+            "X-RateLimit-Limit": String(RATE_LIMIT_MAX_REQUESTS),
+            "X-RateLimit-Remaining": "0",
           },
         }
       );
     }
 
-    const supabaseUrl = (
-      process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      process.env.SUPABASE_URL ||
-      ''
-    ).trim();
-    const supabaseServiceKey = (
-      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-    ).trim();
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json(
-        { error: 'Configuração de base de dados incompleta no servidor.' },
-        { status: 500 }
-      );
-    }
-
     const rawBodyBytes = Buffer.from(await req.arrayBuffer());
-    const rawBody = rawBodyBytes.toString('utf8');
+    const rawBody = rawBodyBytes.toString("utf8");
 
     if (!isAuthorizedRequest(req, rawBody)) {
       return NextResponse.json(
-        { error: 'Acesso não autorizado.' },
+        { error: "Acesso não autorizado." },
         { status: 401 }
       );
     }
@@ -266,7 +301,7 @@ export async function POST(req: NextRequest) {
       body = rawBody ? JSON.parse(rawBody) : null;
     } catch {
       return NextResponse.json(
-        { error: 'JSON malformado.' },
+        { error: "JSON malformado." },
         { status: 400 }
       );
     }
@@ -279,10 +314,6 @@ export async function POST(req: NextRequest) {
     const { companyName, email, source, initialAction, contextNotes } =
       parsed.data;
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-
     let leadRecord: {
       id: string;
       company_name: string;
@@ -293,15 +324,15 @@ export async function POST(req: NextRequest) {
     let createdNewLead = false;
 
     const { data: existingLead, error: lookupError } = await supabase
-      .from('b2b_leads')
-      .select('id, company_name, email, source, status')
-      .eq('email', email)
+      .from("b2b_leads")
+      .select("id, company_name, email, source, status")
+      .eq("email", email)
       .maybeSingle();
 
     if (lookupError) {
       return NextResponse.json(
         {
-          error: 'Erro ao consultar lead na b2b_leads.',
+          error: "Erro ao consultar lead na b2b_leads.",
           details: lookupError.message,
         },
         { status: 500 }
@@ -312,20 +343,20 @@ export async function POST(req: NextRequest) {
       leadRecord = existingLead;
     } else {
       const { data: insertedLead, error: leadError } = await supabase
-        .from('b2b_leads')
+        .from("b2b_leads")
         .insert({
           company_name: companyName,
           email,
           source,
-          status: 'new',
+          status: "new",
         })
-        .select('id, company_name, email, source, status')
+        .select("id, company_name, email, source, status")
         .single();
 
       if (leadError || !insertedLead) {
         return NextResponse.json(
           {
-            error: 'Erro ao gravar lead na b2b_leads.',
+            error: "Erro ao gravar lead na b2b_leads.",
             details: leadError?.message,
           },
           { status: 500 }
@@ -337,11 +368,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: queuedAction, error: queueError } = await supabase
-      .from('robot_action_queue')
+      .from("robot_action_queue")
       .insert({
         lead_id: leadRecord.id,
         action_type: initialAction,
-        approval_status: 'pending_approval',
+        approval_status: "pending_approval",
         operator_decision_at: null,
         payload: {
           company_name: leadRecord.company_name,
@@ -352,16 +383,16 @@ export async function POST(req: NextRequest) {
           ...(contextNotes ? { context_notes: contextNotes } : {}),
         },
       })
-      .select('id, lead_id, action_type, approval_status, created_at')
+      .select("id, lead_id, action_type, approval_status, created_at")
       .single();
 
     if (queueError || !queuedAction) {
       if (createdNewLead) {
-        await supabase.from('b2b_leads').delete().eq('id', leadRecord.id);
+        await supabase.from("b2b_leads").delete().eq("id", leadRecord.id);
       }
       return NextResponse.json(
         {
-          error: 'Falha ao enfileirar ação na robot_action_queue.',
+          error: "Falha ao enfileirar ação na robot_action_queue.",
           details: queueError?.message,
         },
         { status: 500 }
@@ -373,21 +404,21 @@ export async function POST(req: NextRequest) {
         ok: true,
         deduplicated_lead: !createdNewLead,
         message:
-          'Lead registada e ação colocada em pending_approval para tua decisão.',
+          "Lead registada e ação colocada em pending_approval para tua decisão.",
         lead: leadRecord,
         action: queuedAction,
       },
       {
         status: 201,
         headers: {
-          'X-RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
-          'X-RateLimit-Remaining': String(rateResult.remaining),
+          "X-RateLimit-Limit": String(RATE_LIMIT_MAX_REQUESTS),
+          "X-RateLimit-Remaining": String(rateResult.remaining),
         },
       }
     );
   } catch {
     return NextResponse.json(
-      { error: 'Erro interno no servidor.' },
+      { error: "Erro interno no servidor." },
       { status: 500 }
     );
   }
