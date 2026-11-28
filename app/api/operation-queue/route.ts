@@ -5,8 +5,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MIN_INTERVAL_MS = 40_000; // Pausa mínima obrigatória de >= 40 segundos
-const MAX_BATCH_SIZE = 10; // Blocos de 10 leads aprovadas
-const MAX_DAILY_CAP = 30; // Ritmo diário máximo de 20-30 leads/dia
+const MAX_BATCH_SIZE = 10; // Blocos máximos de 10 leads aprovadas
+const MAX_DAILY_CAP = 30; // Teto diário máximo de 20-30 leads/dia
 
 function safeEqual(a: string, b: string): boolean {
   const bufA = Buffer.from(a, "utf8");
@@ -54,6 +54,94 @@ function getSupabaseHeaders() {
   };
 }
 
+export async function GET(req: NextRequest) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  }
+
+  const sb = getSupabaseHeaders();
+  if (!sb) {
+    return NextResponse.json(
+      { error: "Configuração do Supabase em falta no servidor." },
+      { status: 500 }
+    );
+  }
+
+  const statusFilter =
+    req.nextUrl.searchParams.get("status")?.trim() || "pending_approval";
+  const allowedStatuses = new Set(["pending_approval", "approved", "rejected"]);
+  const safeStatus = allowedStatuses.has(statusFilter)
+    ? statusFilter
+    : "pending_approval";
+
+  const queueUrl = `${sb.url}/rest/v1/robot_action_queue?approval_status=eq.${encodeURIComponent(
+    safeStatus
+  )}&order=created_at.desc&limit=25`;
+
+  const qRes = await fetch(queueUrl, { headers: sb.headers, cache: "no-store" });
+  if (!qRes.ok) {
+    const errText = await qRes.text();
+    return NextResponse.json(
+      { error: "Falha ao ler a fila de aprovação.", details: errText },
+      { status: 502 }
+    );
+  }
+
+  const queueItems = (await qRes.json()) as Array<{
+    id: string;
+    lead_id: string | null;
+    action_type: string;
+    approval_status: string;
+    operator_decision_at: string | null;
+    payload: Record<string, unknown> | null;
+    created_at: string;
+  }>;
+
+  const leadIds = Array.from(
+    new Set(
+      queueItems
+        .map((item) => item.lead_id)
+        .filter((id): id is string => Boolean(id))
+    )
+  );
+
+  let leadsById: Record<
+    string,
+    {
+      id: string;
+      company_name: string | null;
+      email: string | null;
+      source: string | null;
+      status: string | null;
+    }
+  > = {};
+
+  if (leadIds.length > 0) {
+    const inList = leadIds.map((id) => `"${id}"`).join(",");
+    const leadsUrl = `${sb.url}/rest/v1/b2b_leads?id=in.(${encodeURIComponent(
+      inList
+    )})&select=id,company_name,email,source,status`;
+    const lRes = await fetch(leadsUrl, { headers: sb.headers, cache: "no-store" });
+    if (lRes.ok) {
+      const leads = (await lRes.json()) as Array<{
+        id: string;
+        company_name: string | null;
+        email: string | null;
+        source: string | null;
+        status: string | null;
+      }>;
+      leadsById = Object.fromEntries(leads.map((l) => [l.id, l]));
+    }
+  }
+
+  const items = queueItems.map((item) => ({
+    ...item,
+    lead: item.lead_id ? leadsById[item.lead_id] || null : null,
+  }));
+
+  return NextResponse.json({ status: safeStatus, items });
+}
+
 export async function POST(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
@@ -68,10 +156,13 @@ export async function POST(req: NextRequest) {
   }
 
   let body: {
-    confirmDispatch?: boolean; // Exige confirmação explícita Sim (true)
-    allowWeekend?: boolean; // Bloqueado por padrão; só com autorização expressa
-    intervalSeconds?: number; // Nunca inferior a 40s
-    limit?: number; // Máximo de 10 por bloco
+    id?: string;
+    decision?: string;
+    note?: string;
+    confirmDispatch?: boolean;
+    allowWeekend?: boolean;
+    intervalSeconds?: number;
+    limit?: number;
   };
 
   try {
@@ -80,11 +171,92 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
   }
 
+  // Ramo A: Registo de decisão humana (approved / rejected) sobre um item da fila
+  if (typeof body.decision === "string" && body.decision.trim().length > 0) {
+    const id = body.id?.trim() || "";
+    const decision = body.decision.trim();
+    const note = body.note?.trim() || "";
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID da linha é obrigatório." },
+        { status: 400 }
+      );
+    }
+    if (decision !== "approved" && decision !== "rejected") {
+      return NextResponse.json(
+        { error: "Decisão inválida. Usa apenas 'approved' ou 'rejected'." },
+        { status: 400 }
+      );
+    }
+
+    const currentUrl = `${sb.url}/rest/v1/robot_action_queue?id=eq.${encodeURIComponent(
+      id
+    )}&select=id,payload,approval_status`;
+    const curRes = await fetch(currentUrl, {
+      headers: sb.headers,
+      cache: "no-store",
+    });
+    if (!curRes.ok) {
+      return NextResponse.json(
+        { error: "Falha ao consultar item da fila." },
+        { status: 502 }
+      );
+    }
+
+    const existingRows = (await curRes.json()) as Array<{
+      id: string;
+      payload: Record<string, unknown> | null;
+      approval_status: string;
+    }>;
+    if (existingRows.length === 0) {
+      return NextResponse.json(
+        { error: "Item não encontrado na fila." },
+        { status: 404 }
+      );
+    }
+
+    const nextPayload: Record<string, unknown> = {
+      ...(existingRows[0].payload || {}),
+      human_decision: decision === "approved" ? "Sim" : "Não",
+      decided_by: "Ronny Dias",
+      ...(note ? { operator_note: note } : {}),
+    };
+
+    const patchUrl = `${sb.url}/rest/v1/robot_action_queue?id=eq.${encodeURIComponent(
+      id
+    )}`;
+    const patchRes = await fetch(patchUrl, {
+      method: "PATCH",
+      headers: {
+        ...sb.headers,
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({
+        approval_status: decision,
+        operator_decision_at: new Date().toISOString(),
+        payload: nextPayload,
+      }),
+    });
+
+    if (!patchRes.ok) {
+      const errText = await patchRes.text();
+      return NextResponse.json(
+        { error: "Falha ao registar decisão na fila.", details: errText },
+        { status: 502 }
+      );
+    }
+
+    const updated = await patchRes.json();
+    return NextResponse.json({ ok: true, item: updated[0] || null });
+  }
+
+  // Ramo B: Despacho cadenciado de itens já aprovados
   if (body.confirmDispatch !== true) {
     return NextResponse.json(
       {
         error:
-          "Trava humana ativa: define confirmDispatch: true após o teu 'Sim' para iniciar a cadeia pausada.",
+          "Trava humana ativa: define confirmDispatch: true após o teu 'Sim' para iniciar a cadeia pausada ou indica 'decision'.",
       },
       { status: 423 }
     );
@@ -102,23 +274,29 @@ export async function POST(req: NextRequest) {
   }
 
   const requestedSeconds =
-    typeof body.intervalSeconds === "number" && Number.isFinite(body.intervalSeconds)
+    typeof body.intervalSeconds === "number" &&
+    Number.isFinite(body.intervalSeconds)
       ? body.intervalSeconds
       : 40;
   const effectiveIntervalMs = Math.max(40, requestedSeconds) * 1000;
 
   const batchLimit = Math.min(
     MAX_BATCH_SIZE,
-    Math.max(1, typeof body.limit === "number" ? Math.floor(body.limit) : MAX_BATCH_SIZE)
+    Math.max(
+      1,
+      typeof body.limit === "number" ? Math.floor(body.limit) : MAX_BATCH_SIZE
+    )
   );
 
-  // Conta quantos itens já foram despachados hoje (UTC) para respeitar o teto diário de 20-30 leads/dia
   const startOfDayIso = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0)
   ).toISOString();
 
   const approvedUrl = `${sb.url}/rest/v1/robot_action_queue?approval_status=eq.approved&order=operator_decision_at.asc&limit=50`;
-  const appRes = await fetch(approvedUrl, { headers: sb.headers, cache: "no-store" });
+  const appRes = await fetch(approvedUrl, {
+    headers: sb.headers,
+    cache: "no-store",
+  });
   if (!appRes.ok) {
     return NextResponse.json(
       { error: "Falha ao consultar itens aprovados na fila." },
@@ -137,7 +315,8 @@ export async function POST(req: NextRequest) {
 
   const dispatchedTodayCount = allApproved.filter((row) => {
     const p = row.payload || {};
-    const dispatchedAt = typeof p.dispatched_at === "string" ? p.dispatched_at : "";
+    const dispatchedAt =
+      typeof p.dispatched_at === "string" ? p.dispatched_at : "";
     return p.dispatch_state === "dispatched" && dispatchedAt >= startOfDayIso;
   }).length;
 
@@ -157,7 +336,8 @@ export async function POST(req: NextRequest) {
     })
     .slice(0, Math.min(batchLimit, remainingDailyQuota));
 
-  const results: Array<{ id: string; status: string; dispatchedAt: string }> = [];
+  const results: Array<{ id: string; status: string; dispatchedAt: string }> =
+    [];
 
   for (let i = 0; i < eligible.length; i++) {
     if (i > 0) {
@@ -175,7 +355,9 @@ export async function POST(req: NextRequest) {
       dispatched_by: "Enzo Dias / Ronny Dias (OaaS)",
     };
 
-    const patchUrl = `${sb.url}/rest/v1/robot_action_queue?id=eq.${encodeURIComponent(item.id)}`;
+    const patchUrl = `${sb.url}/rest/v1/robot_action_queue?id=eq.${encodeURIComponent(
+      item.id
+    )}`;
     const patchRes = await fetch(patchUrl, {
       method: "PATCH",
       headers: {
